@@ -1,0 +1,24 @@
+<div id="gas-container" style="width: 100%; overflow: hidden;">
+  <iframe 
+    id="gas-iframe"
+    src="https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec?page=gallery" 
+    width="100%" 
+    height="1200px" 
+    frameborder="0" 
+    scrolling="yes" 
+    style="border: none; transition: height 0.2s ease;">
+  </iframe>
+</div>
+
+<script>
+  window.addEventListener('message', function(event) {
+    // Security check: You can verify event.origin here if needed
+    if (event.data && event.data.height) {
+      const iframe = document.getElementById('gas-iframe');
+      if (iframe) {
+        // Adjust the iframe height based on the message from GAS
+        iframe.style.height = event.data.height + 'px';
+      }
+    }
+  }, false);
+</script>
