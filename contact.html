@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contact ZariMandir</title>
+  <style>
+    :root {
+      font-family: 'Montserrat', 'Poppins', 'Roboto', sans-serif;
+      background: #f8f9fb;
+      color: #0f172a;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f8f9fb;
+    }
+    .app-shell {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    h1 {
+      margin: 0;
+      font-size: 2rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #0f172a;
+    }
+    p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.6;
+    }
+    .contact-card {
+      background: #fff;
+      border-radius: 1.25rem;
+      padding: 2rem;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+    .contact-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+    }
+    .contact-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      color: #0f172a;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .shipping-note {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+    }
+    @media (max-width: 600px) {
+      .app-shell {
+        padding: 2rem 1rem;
+      }
+      .contact-card {
+        padding: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <div>
+      <h1>Contact</h1>
+      <p>To see new additions, order a piece, or collaborate, reach out directly through the links below.</p>
+    </div>
+    <section class="contact-card">
+      <div class="contact-item">
+        <span class="contact-icon" aria-hidden="true">✉️</span>
+        <a class="contact-link" href="mailto:zarimandir@gamil.com">zarimandir@gamil.com</a>
+      </div>
+      <div class="contact-item">
+        <span class="contact-icon" aria-hidden="true">📷</span>
+        <a class="contact-link" href="https://www.instagram.com/zari_mandir?igsh=dmo3c245d21yZDQw" target="_blank" rel="noreferrer noopener">Instagram</a>
+      </div>
+      <p class="shipping-note">Shipping across USA &amp; Canada</p>
+    </section>
+  </main>
+  
+<script>
+  function sendHeight() {
+    const height = document.body.scrollHeight;
+    // Sends height to the parent window (Hostinger)
+    window.parent.postMessage({ 'height': height }, "*");
+  }
+
+  // Send height when the page loads and whenever the window is resized
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+
+  // Optional: Monitor content changes (e.g., loading images in your gallery)
+  const observer = new ResizeObserver(sendHeight);
+  observer.observe(document.body);
+</script>
+
+</body>
+</html>
