@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventory Gallery</title>
+  <style>
+    :root {
+      font-family: 'Montserrat', 'Poppins', 'Roboto', sans-serif;
+      background: #0f172a;
+      color: #0f172a;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #f8f9fb;
+      color: #0f172a;
+    }
+    .app-shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 3.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .gallery-top {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .category-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 0.35rem;
+      min-height: 48px;
+    }
+    .category-nav button {
+      border: none;
+      background: #fff;
+      color: #0f172a;
+      border-radius: 999px;
+      padding: 0.55rem 1.2rem;
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+    }
+    .category-nav button.active {
+      background: #F14D4B;
+      color: #fff;
+      box-shadow: 0 14px 30px rgba(241, 77, 75, 0.35);
+      transform: translateY(-2px);
+    }
+    .nav-placeholder {
+      color: #475569;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+    }
+    .gallery-meta {
+      font-size: 0.85rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #6b7280;
+    }
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      padding: 0.25rem 0;
+    }
+    .filter-control {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.4em;
+      color: #94a3b8;
+    }
+    .filter-control select {
+      border: 1px solid #e2e8f0;
+      background: #fff;
+      border-radius: 999px;
+      padding: 0.4rem 0.85rem;
+      font-size: 0.95rem;
+      color: #0f172a;
+      min-width: 160px;
+    }
+    #galleryArea {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      min-height: 320px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 30px rgba(15, 23, 42, 0.15);
+    }
+    .card img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      background: #e2e8f0;
+    }
+    .card-content {
+      padding: 1rem 1.1rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+    }
+    .card-content h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #0f172a;
+    }
+    .card-content .info-line {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #475569;
+      letter-spacing: 0.05em;
+    }
+    .status-note {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #94a3b8;
+    }
+    .empty-state {
+      padding: 3rem;
+      text-align: center;
+      font-size: 1rem;
+      color: #475569;
+      background: #fff;
+      border: 1px dashed #d1d5db;
+      border-radius: 0.5rem;
+    }
+    @media (max-width: 768px) {
+      .app-shell {
+        padding: 1.5rem 1rem 2.5rem;
+      }
+      .gallery-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .gallery-meta {
+        font-size: 0.75rem;
+      }
+      .category-nav {
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-right: 0.75rem;
+      }
+      .category-nav button {
+        flex-shrink: 0;
+      }
+      .filters {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .filter-control select {
+        min-width: 100%;
+      }
+      #galleryArea {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+      .card img {
+        height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <div class="gallery-top">
+      <nav class="category-nav" id="folderMenu">
+        <span class="nav-placeholder">Loading item folders…</span>
+      </nav>
+      <div class="gallery-meta" style="display:none;">
+        <span id="galleryCount">Preparing the collection…</span>
+      </div>
+    </div>
+    <section class="filters">
+      <div class="filter-control">
+        <label for="sizeFilter">Size</label>
+        <select id="sizeFilter">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="filter-control">
+        <label for="colorFilter">Color</label>
+        <select id="colorFilter">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="filter-control">
+        <label for="workFilter">Work Style</label>
+        <select id="workFilter">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="filter-control">
+        <label for="statusFilter">Status</label>
+        <select id="statusFilter">
+          <option value="">All</option>
+        </select>
+      </div>
+    </section>
+    <div id="galleryArea"></div>
+  </main>
+
+  <script>
+    const placeholderImage = 'https://via.placeholder.com/400x300?text=No+Image';
+    const SELECTORS = {
+      galleryArea: 'galleryArea',
+      folderMenu: 'folderMenu',
+      sizeFilter: 'sizeFilter',
+      colorFilter: 'colorFilter',
+      workFilter: 'workFilter',
+      statusFilter: 'statusFilter',
+      galleryCount: 'galleryCount'
+    };
+
+    const state = {
+      folders: [],
+      activeIndex: 0,
+      selectedSize: '',
+      selectedColor: '',
+      selectedWork: '',
+      selectedStatus: ''
+    };
+
+    function normalizeStatusValue(value) {
+      return String(value || '').replace(/\s+/g, '').toUpperCase();
+    }
+
+    function setSelectOptions(selectEl, values = []) {
+      if (!selectEl) return;
+      const normalized = (values || []).map(value => String(value || '').trim()).filter(Boolean);
+      const unique = Array.from(new Set(normalized)).sort((a, b) => a.localeCompare(b));
+      selectEl.innerHTML = '<option value="">All</option>';
+      unique.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        selectEl.appendChild(option);
+      });
+    }
+
+    function applyFilters(items = []) {
+      return (items || []).filter(item => {
+        if (state.selectedSize && item.size !== state.selectedSize) return false;
+        if (state.selectedWork && item.workStyle !== state.selectedWork) return false;
+        if (state.selectedColor) {
+          const target = state.selectedColor.toLowerCase();
+          const colorValue = String(item.color || '').toLowerCase();
+          if (!colorValue.includes(target)) return false;
+        }
+        if (state.selectedStatus) {
+          const statusValue = normalizeStatusValue(item.status);
+          if (statusValue !== state.selectedStatus) return false;
+        }
+        return true;
+      });
+    }
+
+    function getActiveFolder() {
+      if (!state.folders.length) return null;
+      const index = Math.max(0, Math.min(state.activeIndex, state.folders.length - 1));
+      return state.folders[index];
+    }
+
+    function getGalleryGroupKey(item) {
+      const uid = String(item.uid || '').trim();
+      const baseUid = uid.replace(/[-_ ]?\d{2,3}$/, '').trim();
+      if (baseUid) return `UID:${baseUid}`;
+      const fileId = String(item.imageFileId || '').trim();
+      if (fileId) return `FILE:${fileId}`;
+      const imageUrl = String(item.imageUrl || '').trim();
+      if (imageUrl) return `URL:${imageUrl}`;
+      const itemType = String(item.itemType || '').trim();
+      const color = String(item.color || '').trim();
+      const work = String(item.workStyle || '').trim();
+      return `META:${itemType}|${color}|${work}`;
+    }
+
+    function groupItemsForGallery(items = []) {
+      const map = new Map();
+      (items || []).forEach(item => {
+        const key = getGalleryGroupKey(item);
+        if (!map.has(key)) {
+          map.set(key, { key, items: [], representative: item });
+        }
+        const entry = map.get(key);
+        entry.items.push(item);
+        if (!entry.representative.imageUrl && item.imageUrl) {
+          entry.representative = item;
+        }
+      });
+      return Array.from(map.values());
+    }
+
+    function getSortedSizes(items = []) {
+      //const sizes = Array.from(new Set(items.map(item => String(item.size || '').trim()).filter(Boolean)));
+      const availableItems = items.filter(item => normalizeStatusValue(item.status) !== 'SOLD');
+      const sizes = Array.from(new Set(availableItems.map(item => String(item.size || '').trim()).filter(Boolean)));
+      const getNum = (value) => {
+        const match = String(value || '').match(/\d+/);
+        return match ? Number(match[0]) : NaN;
+      };
+      sizes.sort((a, b) => {
+        const na = getNum(a);
+        const nb = getNum(b);
+        if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
+        if (!Number.isNaN(na) && Number.isNaN(nb)) return -1;
+        if (Number.isNaN(na) && !Number.isNaN(nb)) return 1;
+        return a.localeCompare(b);
+      });
+      return sizes;
+    }
+
+    function renderGallery(folder, groups) {
+      const gallery = document.getElementById(SELECTORS.galleryArea);
+      if (!gallery) return;
+      gallery.innerHTML = '';
+      if (!folder || !groups.length) {
+        gallery.innerHTML = '<div class="empty-state">No images match the current filters.</div>';
+        return;
+      }
+      groups.forEach(group => {
+        const item = group.representative;
+        const card = document.createElement('article');
+        card.className = 'card';
+        const img = document.createElement('img');
+        img.src = item.thumbnailUrl || item.imageUrl || placeholderImage;
+        img.alt = item.uid || folder.folderName || 'Inventory item';
+        card.appendChild(img);
+        const content = document.createElement('div');
+        content.className = 'card-content';
+        const title = document.createElement('h3');
+        title.textContent = item.uid || folder.folderName || 'Item';
+        content.appendChild(title);
+        if (item.status) {
+          const status = document.createElement('span');
+          status.className = 'status-note';
+          status.textContent = item.status;
+          content.appendChild(status);
+        }
+        const sizes = getSortedSizes(group.items);
+        if (sizes.length) {
+          const info = document.createElement('p');
+          info.className = 'info-line';
+          info.textContent = 'Sizes: ' + sizes.join(', ');
+          content.appendChild(info);
+        }
+        card.appendChild(content);
+        gallery.appendChild(card);
+      });
+    }
+
+    function updateFilterOptions(folder) {
+      if (!folder) return;
+      const sizes = Array.from(new Set(folder.items.map(item => item.size).filter(Boolean)));
+      const colors = Array.from(new Set(folder.items.map(item => item.color).filter(Boolean)));
+      const works = Array.from(new Set(folder.items.map(item => item.workStyle).filter(Boolean)));
+      const statuses = Array.from(new Set(folder.items.map(item => normalizeStatusValue(item.status)).filter(Boolean)));
+      setSelectOptions(document.getElementById(SELECTORS.sizeFilter), sizes);
+      setSelectOptions(document.getElementById(SELECTORS.colorFilter), colors);
+      setSelectOptions(document.getElementById(SELECTORS.workFilter), works);
+      setSelectOptions(document.getElementById(SELECTORS.statusFilter), statuses);
+      const colorSelect = document.getElementById(SELECTORS.colorFilter);
+      const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
+      const workSelect = document.getElementById(SELECTORS.workFilter);
+      if (sizeSelect) sizeSelect.value = state.selectedSize || '';
+      if (colorSelect) colorSelect.value = state.selectedColor || '';
+      if (workSelect) workSelect.value = state.selectedWork || '';
+      const statusSelect = document.getElementById(SELECTORS.statusFilter);
+      if (statusSelect) statusSelect.value = state.selectedStatus || '';
+    }
+
+    function updateGalleryCount(folder, filteredCount, totalCount) {
+      const galleryCount = document.getElementById(SELECTORS.galleryCount);
+      if (!galleryCount) return;
+      if (!folder) {
+        galleryCount.textContent = '0 ITEMS';
+        return;
+      }
+      const total = typeof totalCount === 'number'
+        ? totalCount
+        : (Array.isArray(folder.items) ? folder.items.length : 0);
+      const folderLabel = folder.folderName || 'Untitled';
+      if (typeof filteredCount === 'number' && filteredCount !== total) {
+        galleryCount.textContent = `${folderLabel} - Showing ${filteredCount} of ${total}`;
+      } else {
+        galleryCount.textContent = `${folderLabel} - ${total} ITEMS`;
+      }
+    }
+
+    function updateMenuActiveState() {
+      const buttons = document.getElementById(SELECTORS.folderMenu)?.querySelectorAll('button') || [];
+      buttons.forEach((button, index) => {
+        button.classList.toggle('active', index === state.activeIndex);
+      });
+    }
+
+    function renderCurrentFolder() {
+      const folder = getActiveFolder();
+      const filteredItems = applyFilters(folder ? folder.items : []);
+      const groupedFiltered = groupItemsForGallery(filteredItems);
+      const groupedTotal = groupItemsForGallery(folder ? folder.items : []).length;
+      renderGallery(folder, groupedFiltered);
+      updateGalleryCount(folder, groupedFiltered.length, groupedTotal);
+    }
+
+    function handleFolderSelection(index) {
+      state.activeIndex = index;
+      const folder = getActiveFolder();
+      updateFilterOptions(folder);
+      updateMenuActiveState();
+      renderCurrentFolder();
+    }
+
+    function renderMenu() {
+      const menu = document.getElementById(SELECTORS.folderMenu);
+      if (!menu) return;
+      menu.innerHTML = '';
+      if (!state.folders.length) {
+        menu.innerHTML = '<span class="nav-placeholder">No item folders found.</span>';
+        document.getElementById(SELECTORS.galleryArea).innerHTML = '<div class="empty-state">No inventory found.</div>';
+        document.getElementById(SELECTORS.galleryCount).textContent = 'NO ITEMS';
+        return;
+      }
+      state.folders.forEach((folder, index) => {
+        const button = document.createElement('button');
+        const countLabel = folder.count ? ` (${folder.count})` : '';
+        button.type = 'button';
+        button.textContent = `${folder.folderName || 'Untitled'}${countLabel}`;
+        button.addEventListener('click', () => handleFolderSelection(index));
+        menu.appendChild(button);
+      });
+      updateMenuActiveState();
+      const folder = getActiveFolder();
+      updateFilterOptions(folder);
+      renderCurrentFolder();
+    }
+
+    function bindFilterListeners() {
+      const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
+      const colorSelect = document.getElementById(SELECTORS.colorFilter);
+      const workSelect = document.getElementById(SELECTORS.workFilter);
+      const statusSelect = document.getElementById(SELECTORS.statusFilter);
+
+      if (sizeSelect) {
+        sizeSelect.addEventListener('change', event => {
+          state.selectedSize = event.target.value;
+          renderCurrentFolder();
+        });
+      }
+      if (colorSelect) {
+        colorSelect.addEventListener('change', event => {
+          state.selectedColor = event.target.value;
+          renderCurrentFolder();
+        });
+      }
+      if (workSelect) {
+        workSelect.addEventListener('change', event => {
+          state.selectedWork = event.target.value;
+          renderCurrentFolder();
+        });
+      }
+      if (statusSelect) {
+        statusSelect.addEventListener('change', event => {
+          state.selectedStatus = normalizeStatusValue(event.target.value);
+          renderCurrentFolder();
+        });
+      }
+    }
+
+    function handleData(response) {
+      state.folders = Array.isArray(response.folders) ? response.folders : [];
+      state.activeIndex = 0;
+      state.selectedSize = '';
+      state.selectedColor = '';
+      state.selectedWork = '';
+      state.selectedStatus = '';
+      renderMenu();
+    }
+
+    function handleError(err) {
+      const menu = document.getElementById(SELECTORS.folderMenu);
+      const gallery = document.getElementById(SELECTORS.galleryArea);
+      const count = document.getElementById(SELECTORS.galleryCount);
+      if (menu) menu.innerHTML = '';
+      if (gallery) gallery.innerHTML = `<div class="empty-state">Failed to load gallery: ${err && err.message ? err.message : 'Unknown error'}</div>`;
+      if (count) count.textContent = 'FAILED';
+    }
+
+    function init() {
+      bindFilterListeners();
+      google.script.run
+        .withSuccessHandler(handleData)
+        .withFailureHandler(handleError)
+        .itemGetFoldersWithImages();
+    }
+
+    window.addEventListener('load', init);
+  </script>
+
+<script>
+  function sendHeight() {
+    const height = document.body.scrollHeight;
+    // Sends height to the parent window (Hostinger)
+    window.parent.postMessage({ 'height': height }, "*");
+  }
+
+  // Send height when the page loads and whenever the window is resized
+  window.addEventListener('load', sendHeight);
+  window.addEventListener('resize', sendHeight);
+
+  // Optional: Monitor content changes (e.g., loading images in your gallery)
+  const observer = new ResizeObserver(sendHeight);
+  observer.observe(document.body);
+</script>
+
+</body>
+</html>
+
