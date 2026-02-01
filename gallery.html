@@ -37,6 +37,14 @@
       border-bottom: 1px solid #eee;
       padding-bottom: 1.5rem;
     }
+    .gallery-logo {
+      margin-right: auto;
+    }
+    .gallery-logo img {
+      height: 50px;
+      width: auto;
+      display: block;
+    }
     .category-nav {
       display: flex;
       flex-wrap: wrap;
@@ -200,6 +208,9 @@
       .gallery-meta {
         font-size: 0.7rem;
       }
+      .gallery-logo {
+        margin-right: 0;
+      }
       .category-nav {
         justify-content: flex-start;
         overflow-x: auto;
@@ -212,16 +223,22 @@
         font-size: 0.75rem;
       }
       .filters {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         align-items: flex-start;
         gap: 1rem;
         width: 100%;
       }
+      .filter-control {
+        flex: 1 1 calc(50% - 0.5rem);
+        min-width: 130px;
+      }
       .filter-control select {
-        min-width: 100%;
+        width: 100%;
+        min-width: 0;
       }
       #galleryArea {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
         gap: 1.5rem 0.75rem;
       }
       .card img {
@@ -234,6 +251,11 @@
 <body>
   <main class="app-shell">
     <div class="gallery-top">
+      <div class="gallery-logo">
+        <!-- Replace YOUR_LOGO_FILE_ID with the actual file ID of your logo image from the Drive folder -->
+        <img src="https://drive.google.com/uc?export=view&id=YOUR_LOGO_FILE_ID" alt="ZariMandir" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+        <h2 style="display:none; margin:0; font-family:'Playfair Display',serif; font-size:1.8rem; letter-spacing:0.05em;">ZARIMANDIR</h2>
+      </div>
       <nav class="category-nav" id="folderMenu">
         <span class="nav-placeholder">Loading item folders…</span>
       </nav>
@@ -537,7 +559,25 @@
     }
 
     function handleData(response) {
-      state.folders = Array.isArray(response.folders) ? response.folders : [];
+      const rawFolders = Array.isArray(response.folders) ? response.folders : [];
+      
+      // Merge folders with the same name to prevent duplicates
+      const mergedMap = new Map();
+      
+      rawFolders.forEach(folder => {
+        const name = folder.folderName || 'Untitled';
+        const key = name.trim().toUpperCase();
+        
+        if (!mergedMap.has(key)) {
+          mergedMap.set(key, { ...folder, items: [...folder.items] });
+        } else {
+          const existing = mergedMap.get(key);
+          existing.items.push(...folder.items);
+          existing.count += folder.count;
+        }
+      });
+      
+      state.folders = Array.from(mergedMap.values());
       state.activeIndex = 0;
       state.selectedSize = '';
       state.selectedColor = '';
