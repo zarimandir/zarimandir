@@ -1,24 +1,154 @@
-<div id="gas-container" style="width: 100%; overflow: hidden;">
-  <iframe 
-    id="gas-iframe"
-    src="https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec?page=gallery" 
-    width="100%" 
-    height="1200px" 
-    frameborder="0" 
-    scrolling="yes" 
-    style="border: none; transition: height 0.2s ease;">
-  </iframe>
-</div>
 
-<script>
-  window.addEventListener('message', function(event) {
-    // Security check: You can verify event.origin here if needed
-    if (event.data && event.data.height) {
-      const iframe = document.getElementById('gas-iframe');
-      if (iframe) {
-        // Adjust the iframe height based on the message from GAS
-        iframe.style.height = event.data.height + 'px';
-      }
-    }
-  }, false);
-</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarimandir Clothing Brand</title>
+    <!-- Link to Bootstrap CSS for fancy styling -->
+    <link href="https://cdn.jsdelivr.net" rel="stylesheet">
+    <style>
+        /* Custom CSS to add some simple shadows and spacing */
+        .product-card {
+            transition: transform 0.2s; /* Smooth hover effect */
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        .product-card:hover {
+            transform: translateY(-5px); /* Lift card on hover */
+        }
+        .product-img {
+            height: 300px; /* Standardize image height */
+            object-fit: cover; /* Ensures images cover the space without stretching */
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">ZARIMANDIR</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Shop All</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">About Us</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area: Product Grid -->
+    <div class="container mt-5 mb-5">
+        <h1 class="text-center mb-4">New Arrivals</h1>
+        <p class="text-center text-muted mb-5">Curated collection of our latest pieces.</p>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            
+            <!-- Product Card Example 1: Copy this div for each product -->
+            <div class="col">
+                <div class="card product-card h-100">
+                    <!-- REPLACE the src="..." with your own image links -->
+                    <img src="https://images.unsplash.com" class="card-img-top product-img" alt="Product Name 1">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Classic White Shirt</h5>
+                        <p class="card-text text-muted">$49.99</p>
+                        <a href="#" class="btn btn-outline-dark">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <!-- End Product Card Example 1 -->
+
+            <!-- Product Card Example 2 -->
+            <div class="col">
+                <div class="card product-card h-100">
+                    <!-- REPLACE the src="..." with your own image links -->
+                    <img src="https://images.unsplash.com" class="card-img-top product-img" alt="Product Name 2">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Red Sneakers</h5>
+                        <p class="card-text text-muted">$89.50</p>
+                        <a href="#" class="btn btn-outline-dark">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <!-- End Product Card Example 2 -->
+            
+             <!-- Product Card Example 3 -->
+            <div class="col">
+                <div class="card product-card h-100">
+                    <!-- REPLACE the src="..." with your own image links -->
+                    <img src="https://images.unsplash.com" class="card-img-top product-img" alt="Product Name 3">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Modern Trousers</h5>
+                        <p class="card-text text-muted">$65.00</p>
+                        <a href="#" class="btn btn-outline-dark">View Item</a>
+                    </div>
+                </div>
+            </div>
+            <!-- End Product Card Example 3 -->
+            
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p>&copy; 2026 Zarimandir Clothing Brand</p>
+            <p>High Fashion, Minimal Price.</p>
+        </div>
+    </footer>
+    
+    <!-- Bootstrap JS Bundle (Optional, but useful for navbar toggle) -->
+    <script src="https://cdn.jsdelivr.net"></script>
+<!-- Add this script right before the </body> tag -->
+    <script>
+        // *** REPLACE THIS URL WITH YOUR DEPLOYED GOOGLE APPS SCRIPT WEB APP URL ***
+        const GAS_API_URL = 'https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec?page=gallery';
+
+        // Function to create an individual product card HTML element
+        function createProductCard(product) {
+            return `
+                <div class="col">
+                    <div class="card product-card h-100">
+                        <img src="${product.imageUrl}" class="card-img-top product-img" alt="${product.name}">
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text text-muted">${product.price}</p>
+                            <a href="#" class="btn btn-outline-dark">View Item</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Fetch the data from Google Apps Script and populate the grid
+        fetch(GAS_API_URL)
+            .then(response => response.json()) // Assumes your GAS returns JSON
+            .then(data => {
+                const productGrid = document.querySelector('.row.g-4');
+                // Loop through your products and add them to the page
+                data.products.forEach(product => {
+                    productGrid.innerHTML += createProductCard(product);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+                document.querySelector('.row.g-4').innerHTML = '<p class="text-center col-12">Failed to load products.</p>';
+            });
+    </script>
+</body>
+</html>
+
+</body>
+</html>
