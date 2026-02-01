@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inventory Gallery</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      font-family: 'Lato', sans-serif;
+      font-family: 'Roboto', sans-serif;
       background: #ffffff;
       color: #1a1a1a;
+    }
+    body, button, input, select, textarea {
+      font-family: 'Roboto', sans-serif;
     }
     * {
       box-sizing: border-box;
@@ -56,7 +59,6 @@
       background: transparent;
       color: #666;
       padding: 0.5rem 0;
-      font-family: 'Lato', sans-serif;
       font-size: 0.85rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
@@ -112,7 +114,6 @@
       font-size: 0.9rem;
       color: #1a1a1a;
       min-width: 140px;
-      font-family: 'Lato', sans-serif;
       cursor: pointer;
       appearance: none;
       background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
@@ -160,14 +161,13 @@
       gap: 0.25rem;
       flex: 1;
     }
-    .card-content h3 {
+    .item-description {
       margin: 0;
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
+      font-size: 1.0rem;
       letter-spacing: 0.02em;
       text-transform: uppercase;
       color: #1a1a1a;
-      font-weight: 600;
+      font-weight: 500;
     }
     .card-content .info-line {
       margin: 0;
@@ -175,6 +175,12 @@
       color: #666;
       letter-spacing: 0.05em;
       text-transform: uppercase;
+    }
+    .item-barcode {
+      font-size: 0.75rem;
+      color: #999;
+      letter-spacing: 0.05em;
+      margin-top: 0.25rem;
     }
     .status-note {
       font-size: 0.65rem;
@@ -254,7 +260,7 @@
       <div class="gallery-logo">
         <!-- Replace YOUR_LOGO_FILE_ID with the actual file ID of your logo image from the Drive folder -->
         <img src="https://drive.google.com/uc?export=view&id=YOUR_LOGO_FILE_ID" alt="ZariMandir" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <h2 style="display:none; margin:0; font-family:'Playfair Display',serif; font-size:1.8rem; letter-spacing:0.05em;">ZARIMANDIR</h2>
+        <h2 style="display:none; margin:0; font-size:1.8rem; letter-spacing:0.05em;">ZARIMANDIR</h2>
       </div>
       <nav class="category-nav" id="folderMenu">
         <span class="nav-placeholder">Loading item folders…</span>
@@ -282,12 +288,6 @@
           <option value="">All</option>
         </select>
       </div>
-      <div class="filter-control">
-        <label for="statusFilter">Status</label>
-        <select id="statusFilter">
-          <option value="">All</option>
-        </select>
-      </div>
     </section>
     <div id="galleryArea"></div>
   </main>
@@ -300,7 +300,6 @@
       sizeFilter: 'sizeFilter',
       colorFilter: 'colorFilter',
       workFilter: 'workFilter',
-      statusFilter: 'statusFilter',
       galleryCount: 'galleryCount'
     };
 
@@ -309,8 +308,7 @@
       activeIndex: 0,
       selectedSize: '',
       selectedColor: '',
-      selectedWork: '',
-      selectedStatus: ''
+      selectedWork: ''
     };
 
     function normalizeStatusValue(value) {
@@ -338,10 +336,6 @@
           const target = state.selectedColor.toLowerCase();
           const colorValue = String(item.color || '').toLowerCase();
           if (!colorValue.includes(target)) return false;
-        }
-        if (state.selectedStatus) {
-          const statusValue = normalizeStatusValue(item.status);
-          if (statusValue !== state.selectedStatus) return false;
         }
         return true;
       });
@@ -419,9 +413,18 @@
         card.appendChild(img);
         const content = document.createElement('div');
         content.className = 'card-content';
-        const title = document.createElement('h3');
-        title.textContent = item.uid || folder.folderName || 'Item';
-        content.appendChild(title);
+        
+        // Description: ITEM TYPE + FABRIC + WORK STYLE + "IN" + COLOR
+        const descParts = [item.itemType, item.fabric, item.workStyle].filter(Boolean);
+        let descText = descParts.join(' ');
+        if (item.color) {
+          descText += (descText ? ' IN ' : '') + item.color;
+        }
+        const desc = document.createElement('h3');
+        desc.className = 'item-description';
+        desc.textContent = descText || 'Item';
+        content.appendChild(desc);
+
         if (item.status) {
           const status = document.createElement('span');
           status.className = 'status-note';
@@ -435,6 +438,12 @@
           info.textContent = 'Sizes: ' + sizes.join(', ');
           content.appendChild(info);
         }
+        
+        const barcode = document.createElement('div');
+        barcode.className = 'item-barcode';
+        barcode.textContent = item.uid || folder.folderName || '';
+        content.appendChild(barcode);
+
         card.appendChild(content);
         gallery.appendChild(card);
       });
@@ -445,19 +454,15 @@
       const sizes = Array.from(new Set(folder.items.map(item => item.size).filter(Boolean)));
       const colors = Array.from(new Set(folder.items.map(item => item.color).filter(Boolean)));
       const works = Array.from(new Set(folder.items.map(item => item.workStyle).filter(Boolean)));
-      const statuses = Array.from(new Set(folder.items.map(item => normalizeStatusValue(item.status)).filter(Boolean)));
       setSelectOptions(document.getElementById(SELECTORS.sizeFilter), sizes);
       setSelectOptions(document.getElementById(SELECTORS.colorFilter), colors);
       setSelectOptions(document.getElementById(SELECTORS.workFilter), works);
-      setSelectOptions(document.getElementById(SELECTORS.statusFilter), statuses);
       const colorSelect = document.getElementById(SELECTORS.colorFilter);
       const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
       const workSelect = document.getElementById(SELECTORS.workFilter);
       if (sizeSelect) sizeSelect.value = state.selectedSize || '';
       if (colorSelect) colorSelect.value = state.selectedColor || '';
       if (workSelect) workSelect.value = state.selectedWork || '';
-      const statusSelect = document.getElementById(SELECTORS.statusFilter);
-      if (statusSelect) statusSelect.value = state.selectedStatus || '';
     }
 
     function updateGalleryCount(folder, filteredCount, totalCount) {
@@ -530,7 +535,6 @@
       const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
       const colorSelect = document.getElementById(SELECTORS.colorFilter);
       const workSelect = document.getElementById(SELECTORS.workFilter);
-      const statusSelect = document.getElementById(SELECTORS.statusFilter);
 
       if (sizeSelect) {
         sizeSelect.addEventListener('change', event => {
@@ -550,12 +554,6 @@
           renderCurrentFolder();
         });
       }
-      if (statusSelect) {
-        statusSelect.addEventListener('change', event => {
-          state.selectedStatus = normalizeStatusValue(event.target.value);
-          renderCurrentFolder();
-        });
-      }
     }
 
     function handleData(response) {
@@ -565,15 +563,20 @@
       const mergedMap = new Map();
       
       rawFolders.forEach(folder => {
+        // Filter out SOLD items
+        const validItems = (folder.items || []).filter(item => normalizeStatusValue(item.status) !== 'SOLD');
+        
+        if (validItems.length === 0) return;
+
         const name = folder.folderName || 'Untitled';
         const key = name.trim().toUpperCase();
         
         if (!mergedMap.has(key)) {
-          mergedMap.set(key, { ...folder, items: [...folder.items] });
+          mergedMap.set(key, { ...folder, items: [...validItems], count: validItems.length });
         } else {
           const existing = mergedMap.get(key);
-          existing.items.push(...folder.items);
-          existing.count += folder.count;
+          existing.items.push(...validItems);
+          existing.count += validItems.length;
         }
       });
       
@@ -582,7 +585,6 @@
       state.selectedSize = '';
       state.selectedColor = '';
       state.selectedWork = '';
-      state.selectedStatus = '';
       renderMenu();
     }
 
