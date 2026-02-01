@@ -551,11 +551,7 @@
         const imagesToRender = [];
         const seenUrls = new Set();
         
-        const mainUrl = item.thumbnailUrl || item.imageUrl || placeholderImage;
-        imagesToRender.push({ url: mainUrl, alt: item.uid || 'Item' });
-        if (item.thumbnailUrl) seenUrls.add(item.thumbnailUrl);
-        if (item.imageUrl) seenUrls.add(item.imageUrl);
-
+        // 1. Prioritize website images
         group.items.forEach(gItem => {
           if (gItem.additionalImages && gItem.additionalImages.length > 0) {
             gItem.additionalImages.forEach(extra => {
@@ -566,6 +562,17 @@
             });
           }
         });
+        
+        // 2. Add capture image
+        const mainUrl = item.thumbnailUrl || item.imageUrl;
+        if (mainUrl) {
+          if (!seenUrls.has(mainUrl)) {
+            seenUrls.add(mainUrl);
+            imagesToRender.push({ url: mainUrl, alt: item.uid || 'Item' });
+          }
+        } else if (imagesToRender.length === 0) {
+          imagesToRender.push({ url: placeholderImage, alt: 'No Image' });
+        }
         
         // Render images
         imagesToRender.forEach(imgData => {
@@ -794,7 +801,20 @@
         }
       });
       
-      state.folders = Array.from(mergedMap.values());
+      let folders = Array.from(mergedMap.values());
+
+      // Find and move "3 PIECE" to the front to make it the default.
+      const defaultCategory = "3 PIECE";
+      const defaultIndex = folders.findIndex(f => (f.folderName || '').trim().toUpperCase() === defaultCategory);
+
+      if (defaultIndex > 0) {
+        // The category exists and is not already at the front.
+        // Remove it from its current position and add it to the beginning.
+        const [defaultFolder] = folders.splice(defaultIndex, 1);
+        folders.unshift(defaultFolder);
+      }
+
+      state.folders = folders;
       state.activeIndex = 0;
       state.selectedSize = '';
       state.selectedColor = '';
