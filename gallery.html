@@ -146,13 +146,56 @@
       box-shadow: none;
       opacity: 0.9;
     }
-    .card img {
+    .image-wrapper {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .card-images {
+      display: flex;
+      overflow-x: auto;
+      gap: 0;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      /* Hide scrollbar for cleaner look, but allow scrolling */
+      scrollbar-width: none; 
+      -ms-overflow-style: none;
+    }
+    .card-images::-webkit-scrollbar {
+      display: none;
+    }
+    .card-images img {
       width: 100%;
       aspect-ratio: 3/4;
       height: auto;
       object-fit: cover;
       background: #f4f4f4;
-      margin-bottom: 1rem;
+      flex-shrink: 0;
+      border-radius: 2px;
+      scroll-snap-align: start;
+    }
+    .dots-container {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.6);
+      transition: all 0.2s ease;
+      box-shadow: 0 0 2px rgba(255,255,255,0.5);
+    }
+    .dot.active {
+      background-color: #007bff;
+      transform: scale(1.2);
+      box-shadow: none;
     }
     .card-content {
       padding: 0;
@@ -407,10 +450,70 @@
         const item = group.representative;
         const card = document.createElement('article');
         card.className = 'card';
-        const img = document.createElement('img');
-        img.src = item.thumbnailUrl || item.imageUrl || placeholderImage;
-        img.alt = item.uid || folder.folderName || 'Inventory item';
-        card.appendChild(img);
+        
+        const imgWrapper = document.createElement('div');
+        imgWrapper.className = 'image-wrapper';
+
+        const imgContainer = document.createElement('div');
+        imgContainer.className = 'card-images';
+        
+        // Collect images
+        const imagesToRender = [];
+        const seenUrls = new Set();
+        
+        const mainUrl = item.thumbnailUrl || item.imageUrl || placeholderImage;
+        imagesToRender.push({ url: mainUrl, alt: item.uid || 'Item' });
+        if (item.thumbnailUrl) seenUrls.add(item.thumbnailUrl);
+        if (item.imageUrl) seenUrls.add(item.imageUrl);
+
+        group.items.forEach(gItem => {
+          if (gItem.additionalImages && gItem.additionalImages.length > 0) {
+            gItem.additionalImages.forEach(extra => {
+              if (!seenUrls.has(extra.url)) {
+                seenUrls.add(extra.url);
+                imagesToRender.push({ url: extra.url, alt: 'View' });
+              }
+            });
+          }
+        });
+        
+        // Render images
+        imagesToRender.forEach(imgData => {
+          const img = document.createElement('img');
+          img.src = imgData.url;
+          img.alt = imgData.alt;
+          imgContainer.appendChild(img);
+        });
+
+        imgWrapper.appendChild(imgContainer);
+
+        // Render dots
+        if (imagesToRender.length > 0) {
+          const dotsContainer = document.createElement('div');
+          dotsContainer.className = 'dots-container';
+          for (let i = 0; i < imagesToRender.length; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot' + (i === 0 ? ' active' : '');
+            dotsContainer.appendChild(dot);
+          }
+          imgWrapper.appendChild(dotsContainer);
+
+          // Scroll listener for dots
+          imgContainer.addEventListener('scroll', () => {
+            const width = imgContainer.clientWidth;
+            if (width > 0) {
+              const index = Math.round(imgContainer.scrollLeft / width);
+              const dots = dotsContainer.children;
+              for (let i = 0; i < dots.length; i++) {
+                if (i === index) dots[i].classList.add('active');
+                else dots[i].classList.remove('active');
+              }
+            }
+          }, { passive: true });
+        }
+        
+        card.appendChild(imgWrapper);
+
         const content = document.createElement('div');
         content.className = 'card-content';
         
