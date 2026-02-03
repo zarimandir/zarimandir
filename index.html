@@ -1,99 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZariMandir Collection</title>
     <style>
+        :root {
+            --bg-primary: #FAFAF8;
+            /* Matches gallery background */
+        }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            background-color: #fff;
-        }
-        /* Simple Navigation Bar */
-        .nav-bar {
+            background-color: var(--bg-primary);
+            overflow-x: hidden;
             display: flex;
-            justify-content: center;
-            padding: 20px 0;
-            background-color: #fff;
-            border-bottom: 1px solid #eaeaea;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        .nav-link {
-            margin: 0 20px;
-            text-decoration: none;
-            color: #333;
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            cursor: pointer;
-            padding-bottom: 5px;
-            border-bottom: 2px solid transparent;
-            transition: border-color 0.3s;
-        }
-        .nav-link:hover, .nav-link.active {
-            border-bottom-color: #000;
-        }
+
         /* Iframe Container */
         #gas-container {
             width: 100%;
-            overflow: hidden;
-            min-height: 80vh;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
+
         #gas-iframe {
             width: 100%;
             border: none;
-            transition: height 0.2s ease;
-            display: block; /* Removes bottom whitespace */
+            display: block;
+            flex: 1;
+            min-height: 100vh;
+            /* Height will be updated dynamically by the script below */
         }
     </style>
 </head>
+
 <body>
 
-    <nav class="nav-bar">
-        <a class="nav-link active" onclick="switchPage('gallery', this)">Gallery</a>
-        <a class="nav-link" onclick="switchPage('contact', this)">Contact</a>
-    </nav>
-
     <div id="gas-container">
-        <iframe 
-            id="gas-iframe"
-            src="https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec?page=gallery" 
-            width="100%" 
-            height="1200px" 
-            frameborder="0" 
-            scrolling="no">
+        <iframe id="gas-iframe"
+            src="https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec?page=gallery"
+            title="ZariMandir Collection" allow="clipboard-write" scrolling="no">
         </iframe>
     </div>
 
     <script>
-        const baseUrl = "https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec";
-
-        function switchPage(pageName, element) {
-            // Update active link style
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            if(element) element.classList.add('active');
-
-            // Change iframe source
-            const iframe = document.getElementById('gas-iframe');
-            iframe.src = baseUrl + "?page=" + pageName;
-            
-            // Optional: Reset height while loading
-            iframe.style.height = "1200px"; 
-        }
-
         // Listen for height adjustments from the GAS page
-        window.addEventListener('message', function(event) {
+        window.addEventListener('message', function (event) {
             if (event.data && event.data.height) {
                 const iframe = document.getElementById('gas-iframe');
                 if (iframe) {
-                    iframe.style.height = (event.data.height + 50) + 'px'; // Add a little buffer
+                    // Set height to content height + small buffer to prevent scrollbars
+                    iframe.style.height = (event.data.height + 60) + 'px';
                 }
             }
         }, false);
+
+        // Optional: Re-request height on window resize
+        window.addEventListener('resize', () => {
+            const iframe = document.getElementById('gas-iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.postMessage('requestHeight', '*');
+            }
+        });
     </script>
 </body>
+
 </html>
