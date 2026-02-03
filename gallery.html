@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -603,7 +603,7 @@
       <div class="gallery-header-row">
         <div class="gallery-logo">
           <!-- ZariMandir Logo -->
-          <h1>ZARIMANDIR</h1>
+          <h1 style="display: flex; align-items: center; gap: 10px;">ZARIMANDIR</h1>
           <p
             style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px;">
             Kindly place your order via Instagram DM</p>
@@ -1048,6 +1048,9 @@
 
         const name = folder.folderName || 'Untitled';
         const key = name.trim().toUpperCase();
+
+        // Filter out meta-folders that shouldn't be categories
+        if (key === 'GALLERY' || key === 'CONTACT' || key === 'HOME') return;
 
         if (!mergedMap.has(key)) {
           mergedMap.set(key, { ...folder, items: [...validItems], count: validItems.length });
