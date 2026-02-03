@@ -1,94 +1,180 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inventory Gallery</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      font-family: 'Roboto', sans-serif;
-      background: #ffffff;
-      color: #1a1a1a;
+      --primary: #2C2C2C;
+      --secondary: #8B7355;
+      --accent: #D4AF37;
+      --bg-primary: #FAFAF8;
+      --bg-secondary: #FFFFFF;
+      --text-primary: #1A1A1A;
+      --text-secondary: #6B6B6B;
+      --text-tertiary: #9A9A9A;
+      --border-light: #F0F0F0;
+      --border-medium: #E8E8E8;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    body, button, input, select, textarea {
-      font-family: 'Roboto', sans-serif;
+
+    body,
+    button,
+    input,
+    select,
+    textarea {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
+
     * {
       box-sizing: border-box;
     }
+
     body {
       margin: 0;
       min-height: 100vh;
-      background: #ffffff;
-      color: #1a1a1a;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.7;
+      font-weight: 400;
     }
+
     .app-shell {
-      max-width: 1200px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
+      padding: 1rem 1.5rem 3rem;
       display: flex;
       flex-direction: column;
-      gap: 2rem;
+      gap: 0.75rem;
     }
+
     .gallery-top {
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0;
+    }
+
+    .gallery-header-row {
+      display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 1.5rem;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 1.5rem;
+      gap: 1rem;
     }
+
     .gallery-logo {
       margin-right: auto;
     }
+
     .gallery-logo img {
-      height: 50px;
+      height: 60px;
       width: auto;
       display: block;
+      transition: opacity var(--transition);
     }
+
+    .gallery-logo img:hover {
+      opacity: 0.8;
+    }
+
+    .social-icons {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .social-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all var(--transition);
+      border: 1px solid var(--border-medium);
+      position: relative;
+    }
+
+    .social-icon:hover {
+      transform: translateY(-3px) scale(1.1);
+      box-shadow: var(--shadow-md);
+    }
+
+    .social-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+
     .category-nav {
       display: flex;
       flex-wrap: wrap;
       gap: 1.5rem;
       align-items: center;
     }
+
     .category-nav button {
       border: none;
       background: transparent;
-      color: #666;
-      padding: 0.5rem 0;
-      font-size: 0.85rem;
-      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+      padding: 0.75rem 1.5rem;
+      font-size: 0.8125rem;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
       cursor: pointer;
-      font-weight: 400;
-      transition: color 0.2s ease;
+      font-weight: 500;
+      transition: all var(--transition);
       box-shadow: none;
-      border-bottom: 2px solid transparent;
+      border: 1px solid var(--border-medium);
+      border-radius: 24px;
     }
+
     .category-nav button:hover {
-      color: #000;
+      color: var(--primary);
+      background: var(--bg-primary);
+      border-color: var(--primary);
     }
+
     .category-nav button.active {
-      background: transparent;
-      color: #000;
-      box-shadow: none;
+      background: var(--primary);
+      color: var(--bg-secondary);
+      box-shadow: var(--shadow-sm);
       transform: none;
-      border-bottom-color: #000;
+      border-color: var(--primary);
+      font-weight: 600;
     }
+
     .nav-placeholder {
       color: #999;
       font-size: 0.75rem;
       letter-spacing: 0.1em;
     }
+
     .gallery-meta {
       font-size: 0.85rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #999;
     }
+
     .filters {
       display: flex;
       flex-wrap: wrap;
@@ -96,6 +182,7 @@
       align-items: flex-end;
       padding: 0;
     }
+
     .filter-control {
       display: flex;
       flex-direction: column;
@@ -103,34 +190,82 @@
       font-size: 0.7rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: #666;
+      color: var(--text-secondary);
     }
+
+
+
+    /* Filters Section */
+    .filters {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0;
+      transition: all var(--transition);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 0.25rem;
+    }
+
+    .filters::-webkit-scrollbar {
+      display: none;
+    }
+
+
+
+    .filter-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .filter-control label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
     .filter-control select {
-      border: none;
-      border-bottom: 1px solid #ddd;
-      background: transparent;
-      border-radius: 0;
-      padding: 0.4rem 1.5rem 0.4rem 0;
-      font-size: 0.9rem;
-      color: #1a1a1a;
-      min-width: 140px;
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      background: var(--bg-secondary);
+      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+      min-width: auto;
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+      background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232C2C2C%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
       background-repeat: no-repeat;
-      background-position: right 0 top 50%;
-      background-size: 0.65em auto;
+      background-position: right 0.5rem top 50%;
+      background-size: 0.5em auto;
+      transition: border-color var(--transition);
+      font-weight: 400;
     }
+
+    .filter-control select:hover {
+      border-color: var(--primary);
+    }
+
     .filter-control select:focus {
       outline: none;
-      border-bottom-color: #000;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(44, 44, 44, 0.05);
     }
+
     #galleryArea {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 2.5rem 1.5rem;
-      margin-top: 1rem;
+      gap: 1.5rem 1rem;
+      margin-top: 0.5rem;
     }
+
     .card {
       background: transparent;
       border-radius: 0;
@@ -141,15 +276,18 @@
       min-height: auto;
       transition: opacity 0.3s ease;
     }
+
     .card:hover {
       transform: none;
       box-shadow: none;
       opacity: 0.9;
     }
+
     .image-wrapper {
       position: relative;
       margin-bottom: 1rem;
     }
+
     .card-images {
       display: flex;
       overflow-x: auto;
@@ -157,23 +295,32 @@
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
       /* Hide scrollbar for cleaner look, but allow scrolling */
-      scrollbar-width: none; 
+      scrollbar-width: none;
       -ms-overflow-style: none;
     }
+
     .card-images::-webkit-scrollbar {
       display: none;
     }
+
     .card-images img {
       width: 100%;
       aspect-ratio: 3/4;
       height: auto;
       object-fit: cover;
-      background: #f4f4f4;
+      background: var(--bg-primary);
       flex-shrink: 0;
-      border-radius: 2px;
+      border-radius: var(--radius-sm);
       scroll-snap-align: start;
       cursor: pointer;
+      transition: transform var(--transition);
+      border: 1px solid var(--border-light);
     }
+
+    .card-images img:hover {
+      transform: scale(1.02);
+    }
+
     .dots-container {
       position: absolute;
       bottom: 12px;
@@ -185,19 +332,22 @@
       pointer-events: none;
       z-index: 2;
     }
+
     .dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
       background-color: rgba(0, 0, 0, 0.6);
       transition: all 0.2s ease;
-      box-shadow: 0 0 2px rgba(255,255,255,0.5);
+      box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
     }
+
     .dot.active {
       background-color: #007bff;
       transform: scale(1.2);
       box-shadow: none;
     }
+
     .nav-btn {
       position: absolute;
       top: 50%;
@@ -216,21 +366,33 @@
       transition: opacity 0.2s, background 0.2s;
       font-size: 24px;
       color: #333;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
       line-height: 1;
       padding-bottom: 4px;
     }
+
     .nav-btn:hover {
       background: rgba(255, 255, 255, 1);
     }
+
     .image-wrapper:hover .nav-btn {
       opacity: 1;
     }
-    .nav-btn.prev { left: 8px; }
-    .nav-btn.next { right: 8px; }
-    @media (hover: none) {
-      .nav-btn { display: none; }
+
+    .nav-btn.prev {
+      left: 8px;
     }
+
+    .nav-btn.next {
+      right: 8px;
+    }
+
+    @media (hover: none) {
+      .nav-btn {
+        display: none;
+      }
+    }
+
     .card-content {
       padding: 0;
       display: flex;
@@ -238,6 +400,7 @@
       gap: 0.25rem;
       flex: 1;
     }
+
     .item-description {
       margin: 0;
       font-size: 1.0rem;
@@ -246,6 +409,7 @@
       color: #1a1a1a;
       font-weight: 500;
     }
+
     .card-content .info-line {
       margin: 0;
       font-size: 0.8rem;
@@ -253,12 +417,14 @@
       letter-spacing: 0.05em;
       text-transform: uppercase;
     }
+
     .item-barcode {
       font-size: 0.75rem;
       color: #999;
       letter-spacing: 0.05em;
       margin-top: 0.25rem;
     }
+
     .status-note {
       font-size: 0.65rem;
       text-transform: uppercase;
@@ -267,6 +433,7 @@
       font-weight: 700;
       margin-top: 0.25rem;
     }
+
     .empty-state {
       padding: 3rem;
       text-align: center;
@@ -277,6 +444,7 @@
       border-radius: 0;
       grid-column: 1 / -1;
     }
+
     /* Lightbox */
     .lightbox {
       display: none;
@@ -291,34 +459,45 @@
       align-items: center;
       opacity: 0;
       transition: opacity 0.3s ease;
-      overflow: hidden; /* Prevent scrolling when not zoomed */
+      overflow: hidden;
+      /* Prevent scrolling when not zoomed */
     }
+
     .lightbox.visible {
       opacity: 1;
     }
+
     /* Zoomed state for lightbox */
     .lightbox.active-zoom {
-      display: block; /* Switch from flex to block to allow scrolling */
-      overflow: auto; /* Enable scrolling */
+      display: block;
+      /* Switch from flex to block to allow scrolling */
+      overflow: auto;
+      /* Enable scrolling */
       text-align: center;
     }
+
     .lightbox img {
       max-width: 95%;
       max-height: 95%;
       object-fit: contain;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      cursor: zoom-in; /* Indicate clickable */
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+      cursor: zoom-in;
+      /* Indicate clickable */
       transition: transform 0.2s ease;
     }
+
     .lightbox.active-zoom img {
       max-width: none;
       max-height: none;
       object-fit: contain;
       cursor: zoom-out;
-      margin: 20px auto; /* Center horizontally and add vertical space */
+      margin: 20px auto;
+      /* Center horizontally and add vertical space */
     }
+
     .lightbox-close {
-      position: fixed; /* Keep close button fixed on screen even when scrolling */
+      position: fixed;
+      /* Keep close button fixed on screen even when scrolling */
       top: 20px;
       right: 30px;
       color: #fff;
@@ -328,23 +507,35 @@
       user-select: none;
       z-index: 2001;
     }
+
     @media (max-width: 768px) {
       .app-shell {
         padding: 1.5rem 1rem;
       }
+
       .gallery-top {
-        flex-direction: column;
-        align-items: flex-start;
+        gap: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
+
+      .gallery-header-row {
+        width: 100%;
         gap: 1rem;
-        border-bottom: none;
-        padding-bottom: 0;
       }
-      .gallery-meta {
-        font-size: 0.7rem;
+
+      .gallery-logo img {
+        height: 50px;
       }
-      .gallery-logo {
-        margin-right: 0;
+
+      .social-icons {
+        gap: 0.75rem;
       }
+
+      .social-icon {
+        width: 40px;
+        height: 40px;
+      }
+
       .category-nav {
         justify-content: flex-start;
         overflow-x: auto;
@@ -352,52 +543,101 @@
         width: 100%;
         border-bottom: 1px solid #eee;
       }
+
       .category-nav button {
         flex-shrink: 0;
         font-size: 0.75rem;
       }
-      .filters {
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        gap: 1rem;
-        width: 100%;
+
+
+
+
+
+
+
+      .filter-control label {
+        font-size: 0.75rem;
       }
-      .filter-control {
-        flex: 1 1 calc(50% - 0.5rem);
-        min-width: 130px;
+
+      .filter-control select {
+        font-size: 0.75rem;
+        padding: 0.4rem 1.75rem 0.4rem 0.6rem;
       }
+
       .filter-control select {
         width: 100%;
         min-width: 0;
       }
+
       #galleryArea {
         grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
         gap: 1.5rem 0.75rem;
       }
+
       .card img {
         height: auto;
         margin-bottom: 0.75rem;
       }
     }
   </style>
+  <!-- Load mock data for local development -->
+  <script src="dev-mock.js"></script>
 </head>
+
 <body>
   <main class="app-shell">
     <div class="gallery-top">
-      <div class="gallery-logo">
-        <!-- Replace YOUR_LOGO_FILE_ID with the actual file ID of your logo image from the Drive folder -->
-        <img src="https://drive.google.com/uc?export=view&id=YOUR_LOGO_FILE_ID" alt="ZariMandir" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-        <h2 style="display:none; margin:0; font-size:1.8rem; letter-spacing:0.05em;">ZARIMANDIR</h2>
-      </div>
-      <nav class="category-nav" id="folderMenu">
-        <span class="nav-placeholder">Loading item folders…</span>
-      </nav>
-      <div class="gallery-meta" style="display:none;">
-        <span id="galleryCount">Preparing the collection…</span>
+      <!-- Top row: Logo + Social Icons -->
+      <div class="gallery-header-row">
+        <div class="gallery-logo">
+          <!-- ZariMandir Logo -->
+          <img src="https://lh3.googleusercontent.com/d/1FrmnuVOo9QU_gz529R_n3gmy-DPo0yDw" alt="ZariMandir"
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+          <h1
+            style="display:none; margin:0; font-size:1.8rem; font-family: 'Playfair Display', serif; font-weight: 600; letter-spacing:0.05em; color: var(--text-primary);">
+            ZARIMANDIR</h1>
+          <p
+            style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px;">
+            Kindly place your order via Instagram DM</p>
+        </div>
+
+        <!-- Social Icons -->
+        <div class="social-icons">
+          <a href="https://www.instagram.com/zari_mandir/" target="_blank" rel="noopener noreferrer"
+            class="social-icon social-icon-instagram" title="Follow us on Instagram">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#FED576" />
+                  <stop offset="25%" style="stop-color:#F47133" />
+                  <stop offset="50%" style="stop-color:#BC3081" />
+                  <stop offset="100%" style="stop-color:#4C63D2" />
+                </linearGradient>
+              </defs>
+              <path fill="url(#instagram-gradient)"
+                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+            </svg>
+          </a>
+          <a href="mailto:zarimandir@gmail.com" class="social-icon social-icon-gmail" title="Email us">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill="#EA4335"
+                d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
-    <section class="filters">
+
+    <!-- Bottom row: Category Navigation -->
+    <nav class="category-nav" id="folderMenu">
+      <span class="nav-placeholder">Loading item folders…</span>
+    </nav>
+    <div class="gallery-meta" style="display:none;">
+      <span id="galleryCount">Preparing the collection…</span>
+    </div>
+    </div>
+
+    <section class="filters" id="filtersSection">
       <div class="filter-control">
         <label for="sizeFilter">Size</label>
         <select id="sizeFilter">
@@ -540,17 +780,17 @@
         const item = group.representative;
         const card = document.createElement('article');
         card.className = 'card';
-        
+
         const imgWrapper = document.createElement('div');
         imgWrapper.className = 'image-wrapper';
 
         const imgContainer = document.createElement('div');
         imgContainer.className = 'card-images';
-        
+
         // Collect images
         const imagesToRender = [];
         const seenUrls = new Set();
-        
+
         // 1. Prioritize website images
         group.items.forEach(gItem => {
           if (gItem.additionalImages && gItem.additionalImages.length > 0) {
@@ -562,7 +802,7 @@
             });
           }
         });
-        
+
         // 2. Add capture image
         const mainUrl = item.thumbnailUrl || item.imageUrl;
         if (mainUrl) {
@@ -573,7 +813,7 @@
         } else if (imagesToRender.length === 0) {
           imagesToRender.push({ url: placeholderImage, alt: 'No Image' });
         }
-        
+
         // Render images
         imagesToRender.forEach(imgData => {
           const img = document.createElement('img');
@@ -629,12 +869,12 @@
             imgWrapper.appendChild(nextBtn);
           }
         }
-        
+
         card.appendChild(imgWrapper);
 
         const content = document.createElement('div');
         content.className = 'card-content';
-        
+
         // Description: ITEM TYPE + FABRIC + WORK STYLE + "IN" + COLOR
         const descParts = [item.itemType, item.fabric, item.workStyle].filter(Boolean);
         let descText = descParts.join(' ');
@@ -659,7 +899,7 @@
           info.textContent = 'Sizes: ' + sizes.join(', ');
           content.appendChild(info);
         }
-        
+
         const barcode = document.createElement('div');
         barcode.className = 'item-barcode';
         barcode.textContent = item.uid || folder.folderName || '';
@@ -743,7 +983,16 @@
         const countLabel = folder.count ? ` (${folder.count})` : '';
         button.type = 'button';
         button.textContent = `${folder.folderName || 'Untitled'}${countLabel}`;
-        button.addEventListener('click', () => handleFolderSelection(index));
+        button.addEventListener('click', () => {
+          handleFolderSelection(index);
+          // Update URL with category parameter for shareable links
+          const categoryName = folder.folderName || '';
+          if (categoryName) {
+            const url = new URL(window.location);
+            url.searchParams.set('category', categoryName);
+            window.history.pushState({}, '', url);
+          }
+        });
         menu.appendChild(button);
       });
       updateMenuActiveState();
@@ -779,19 +1028,19 @@
 
     function handleData(response) {
       const rawFolders = Array.isArray(response.folders) ? response.folders : [];
-      
+
       // Merge folders with the same name to prevent duplicates
       const mergedMap = new Map();
-      
+
       rawFolders.forEach(folder => {
         // Filter out SOLD items
         const validItems = (folder.items || []).filter(item => normalizeStatusValue(item.status) !== 'SOLD');
-        
+
         if (validItems.length === 0) return;
 
         const name = folder.folderName || 'Untitled';
         const key = name.trim().toUpperCase();
-        
+
         if (!mergedMap.has(key)) {
           mergedMap.set(key, { ...folder, items: [...validItems], count: validItems.length });
         } else {
@@ -800,22 +1049,40 @@
           existing.count += validItems.length;
         }
       });
-      
+
       let folders = Array.from(mergedMap.values());
 
-      // Find and move "3 PIECE" to the front to make it the default.
-      const defaultCategory = "3 PIECE";
-      const defaultIndex = folders.findIndex(f => (f.folderName || '').trim().toUpperCase() === defaultCategory);
+      // Check URL parameters for category
+      const urlParams = new URLSearchParams(window.location.search);
+      const categoryParam = urlParams.get('category');
 
-      if (defaultIndex > 0) {
-        // The category exists and is not already at the front.
-        // Remove it from its current position and add it to the beginning.
-        const [defaultFolder] = folders.splice(defaultIndex, 1);
-        folders.unshift(defaultFolder);
+      let defaultIndex = 0;
+
+      if (categoryParam) {
+        // If category is specified in URL, try to find and use it
+        const paramIndex = folders.findIndex(f =>
+          (f.folderName || '').trim().toUpperCase() === categoryParam.trim().toUpperCase()
+        );
+        if (paramIndex >= 0) {
+          defaultIndex = paramIndex;
+        }
+      } else {
+        // Default behavior: Find and move "3 PIECE" to the front
+        const defaultCategory = "3 PIECE";
+        const threePieceIndex = folders.findIndex(f =>
+          (f.folderName || '').trim().toUpperCase() === defaultCategory
+        );
+        if (threePieceIndex > 0) {
+          const [defaultFolder] = folders.splice(threePieceIndex, 1);
+          folders.unshift(defaultFolder);
+          defaultIndex = 0;
+        } else if (threePieceIndex === 0) {
+          defaultIndex = 0;
+        }
       }
 
       state.folders = folders;
-      state.activeIndex = 0;
+      state.activeIndex = defaultIndex;
       state.selectedSize = '';
       state.selectedColor = '';
       state.selectedWork = '';
@@ -833,30 +1100,45 @@
 
     function init() {
       bindFilterListeners();
-      google.script.run
-        .withSuccessHandler(handleData)
-        .withFailureHandler(handleError)
-        .itemGetFoldersWithImages();
+
+      // Check if running in local development mode
+      const isLocalDev = window.location.hostname === 'localhost' ||
+        window.location.hostname === '127.0.0.1';
+
+      if (isLocalDev && window.MOCK_GALLERY_DATA) {
+        console.log('🔧 LOCAL DEV MODE: Using mock data');
+        // Use mock data for local testing
+        handleData(window.MOCK_GALLERY_DATA);
+      } else {
+        console.log('🚀 PRODUCTION MODE: Fetching real data from Apps Script');
+        // Use real Apps Script API
+        google.script.run
+          .withSuccessHandler(handleData)
+          .withFailureHandler(handleError)
+          .itemGetFoldersWithImages();
+      }
     }
+
 
     window.addEventListener('load', init);
   </script>
 
-<script>
-  function sendHeight() {
-    const height = document.body.scrollHeight;
-    // Sends height to the parent window (Hostinger)
-    window.parent.postMessage({ 'height': height }, "*");
-  }
+  <script>
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      // Sends height to the parent window (Hostinger)
+      window.parent.postMessage({ 'height': height }, "*");
+    }
 
-  // Send height when the page loads and whenever the window is resized
-  window.addEventListener('load', sendHeight);
-  window.addEventListener('resize', sendHeight);
+    // Send height when the page loads and whenever the window is resized
+    window.addEventListener('load', sendHeight);
+    window.addEventListener('resize', sendHeight);
 
-  // Optional: Monitor content changes (e.g., loading images in your gallery)
-  const observer = new ResizeObserver(sendHeight);
-  observer.observe(document.body);
-</script>
+    // Optional: Monitor content changes (e.g., loading images in your gallery)
+    const observer = new ResizeObserver(sendHeight);
+    observer.observe(document.body);
+  </script>
 
 </body>
+
 </html>
