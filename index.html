@@ -15,7 +15,8 @@
             margin: 0;
             padding: 0;
             background-color: var(--bg-primary);
-            overflow-x: hidden;
+            overflow: hidden;
+            /* Prevent wrapper scrollbars */
             display: flex;
             flex-direction: column;
             min-height: 100vh;
@@ -44,7 +45,7 @@
 
     <div id="gas-container">
         <iframe id="gas-iframe"
-            src="https://script.google.com/macros/s/AKfycbxzM6BPD6jbzf2p8shP7zRsU2ayA70UdNbLLU2azZRC_E6IAuXUmkDdoYpkkAvGxm6k/exec?page=gallery"
+            src="https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec?page=gallery"
             title="ZariMandir Collection" allow="clipboard-write" scrolling="no">
         </iframe>
     </div>
@@ -55,19 +56,11 @@
             if (event.data && event.data.height) {
                 const iframe = document.getElementById('gas-iframe');
                 if (iframe) {
-                    // Set height to content height + small buffer to prevent scrollbars
+                    // Set height to content height + small buffer
                     iframe.style.height = (event.data.height + 60) + 'px';
                 }
             }
         }, false);
-
-        // Optional: Re-request height on window resize
-        window.addEventListener('resize', () => {
-            const iframe = document.getElementById('gas-iframe');
-            if (iframe && iframe.contentWindow) {
-                iframe.contentWindow.postMessage('requestHeight', '*');
-            }
-        });
     </script>
 </body>
 
