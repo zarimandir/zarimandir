@@ -805,7 +805,11 @@
             gItem.additionalImages.forEach(extra => {
               if (!seenUrls.has(extra.url)) {
                 seenUrls.add(extra.url);
-                imagesToRender.push({ url: extra.url, alt: 'View' });
+                imagesToRender.push({ 
+                  thumbnailUrl: extra.url,
+                  fullUrl: extra.url,
+                  alt: 'View' 
+                });
               }
             });
           }
@@ -816,18 +820,27 @@
         if (mainUrl) {
           if (!seenUrls.has(mainUrl)) {
             seenUrls.add(mainUrl);
-            imagesToRender.push({ url: mainUrl, alt: item.uid || 'Item' });
+            imagesToRender.push({ 
+              thumbnailUrl: item.thumbnailUrl || item.imageUrl,
+              fullUrl: item.imageUrl || item.thumbnailUrl || mainUrl,
+              alt: item.uid || 'Item' 
+            });
           }
         } else if (imagesToRender.length === 0) {
-          imagesToRender.push({ url: placeholderImage, alt: 'No Image' });
+          imagesToRender.push({ 
+            thumbnailUrl: placeholderImage,
+            fullUrl: placeholderImage,
+            alt: 'No Image' 
+          });
         }
 
         // Render images
         imagesToRender.forEach(imgData => {
           const img = document.createElement('img');
-          img.src = imgData.url;
+          img.src = imgData.thumbnailUrl || imgData.url;
+          img.setAttribute('data-full-url', imgData.fullUrl || imgData.url);
           img.alt = imgData.alt;
-          img.onclick = () => openLightbox(imgData.url);
+          img.onclick = () => openLightbox(img.getAttribute('data-full-url'));
           imgContainer.appendChild(img);
         });
 
@@ -1122,14 +1135,54 @@
         handleData(window.MOCK_GALLERY_DATA);
       } else {
         console.log('🚀 PRODUCTION MODE: Fetching real data from Apps Script');
-        // Use real Apps Script API
+        // Use real Apps Script API - PUBLIC version (no sensitive pricing/supplier data)
         google.script.run
           .withSuccessHandler(handleData)
           .withFailureHandler(handleError)
-          .itemGetFoldersWithImages();
+          .itemGetPublicFoldersWithImages();
       }
     }
 
+    // Lightbox functionality
+    function openLightbox(imageSrc) {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = document.getElementById('lightbox-img');
+      if (!lightbox || !lightboxImg) return;
+      
+      lightboxImg.src = imageSrc;
+      lightbox.style.display = 'flex';
+      
+      // Prevent body scrolling when lightbox is open
+      document.body.style.overflow = 'hidden';
+      
+      // Trigger fade-in animation
+      setTimeout(() => lightbox.classList.add('visible'), 10);
+    }
+
+    function closeLightbox() {
+      const lightbox = document.getElementById('lightbox');
+      if (!lightbox) return;
+      
+      // Fade out
+      lightbox.classList.remove('visible');
+      lightbox.classList.remove('active-zoom');
+      
+      // Re-enable body scrolling
+      document.body.style.overflow = '';
+      
+      // Hide after animation
+      setTimeout(() => {
+        lightbox.style.display = 'none';
+      }, 300);
+    }
+
+    function toggleZoom(event) {
+      event.stopPropagation();
+      const lightbox = document.getElementById('lightbox');
+      if (!lightbox) return;
+      
+      lightbox.classList.toggle('active-zoom');
+    }
 
     window.addEventListener('load', init);
   </script>
