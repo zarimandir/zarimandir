@@ -805,10 +805,10 @@
             gItem.additionalImages.forEach(extra => {
               if (!seenUrls.has(extra.url)) {
                 seenUrls.add(extra.url);
-                imagesToRender.push({ 
+                imagesToRender.push({
                   thumbnailUrl: extra.url,
                   fullUrl: extra.url,
-                  alt: 'View' 
+                  alt: 'View'
                 });
               }
             });
@@ -820,17 +820,17 @@
         if (mainUrl) {
           if (!seenUrls.has(mainUrl)) {
             seenUrls.add(mainUrl);
-            imagesToRender.push({ 
+            imagesToRender.push({
               thumbnailUrl: item.thumbnailUrl || item.imageUrl,
               fullUrl: item.imageUrl || item.thumbnailUrl || mainUrl,
-              alt: item.uid || 'Item' 
+              alt: item.uid || 'Item'
             });
           }
         } else if (imagesToRender.length === 0) {
-          imagesToRender.push({ 
+          imagesToRender.push({
             thumbnailUrl: placeholderImage,
             fullUrl: placeholderImage,
-            alt: 'No Image' 
+            alt: 'No Image'
           });
         }
 
@@ -1126,7 +1126,8 @@
       bindFilterListeners();
 
       // Check if running in local development mode
-      const isLocalDev = window.location.hostname === 'localhost' ||
+      const isLocalDev = window.location.protocol === 'file:' ||
+        window.location.hostname === 'localhost' ||
         window.location.hostname === '127.0.0.1';
 
       if (isLocalDev && window.MOCK_GALLERY_DATA) {
@@ -1143,46 +1144,46 @@
       }
     }
 
-    // Lightbox functionality
-    function openLightbox(imageSrc) {
+    // Lightbox functionality - Make globally accessible for inline onclick handlers
+    window.openLightbox = function (imageSrc) {
       const lightbox = document.getElementById('lightbox');
       const lightboxImg = document.getElementById('lightbox-img');
       if (!lightbox || !lightboxImg) return;
-      
+
       lightboxImg.src = imageSrc;
       lightbox.style.display = 'flex';
-      
+
       // Prevent body scrolling when lightbox is open
       document.body.style.overflow = 'hidden';
-      
+
       // Trigger fade-in animation
       setTimeout(() => lightbox.classList.add('visible'), 10);
-    }
+    };
 
-    function closeLightbox() {
+    window.closeLightbox = function () {
       const lightbox = document.getElementById('lightbox');
       if (!lightbox) return;
-      
+
       // Fade out
       lightbox.classList.remove('visible');
       lightbox.classList.remove('active-zoom');
-      
+
       // Re-enable body scrolling
       document.body.style.overflow = '';
-      
+
       // Hide after animation
       setTimeout(() => {
         lightbox.style.display = 'none';
       }, 300);
-    }
+    };
 
-    function toggleZoom(event) {
+    window.toggleZoom = function (event) {
       event.stopPropagation();
       const lightbox = document.getElementById('lightbox');
       if (!lightbox) return;
-      
+
       lightbox.classList.toggle('active-zoom');
-    }
+    };
 
     window.addEventListener('load', init);
   </script>
