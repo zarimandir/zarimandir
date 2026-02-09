@@ -2,6 +2,15 @@
 <html lang="en">
 
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-3T6BZLC6VH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-3T6BZLC6VH');
+  </script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Inventory Gallery</title>
@@ -696,15 +705,16 @@
         <div class="gallery-logo">
           <!-- ZariMandir Logo -->
           <h1 style="display: flex; align-items: center; gap: 10px;">ZARIMANDIR</h1>
-          <p
-            style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px;">
+          <p style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px; cursor: pointer;"
+            onclick="if(typeof gtag !== 'undefined') gtag('event', 'generate_lead', {lead_source: 'instagram_text'}); window.open('https://ig.me/m/zari_mandir', '_blank');">
             Kindly place your order via Instagram DM</p>
         </div>
 
         <!-- Social Icons -->
         <div class="social-icons">
           <a href="https://www.instagram.com/zari_mandir/" target="_blank" rel="noopener noreferrer"
-            class="social-icon social-icon-instagram" title="Follow us on Instagram">
+            class="social-icon social-icon-instagram" title="Follow us on Instagram"
+            onclick="if(typeof gtag !== 'undefined') gtag('event', 'generate_lead', {lead_source: 'instagram_icon'});">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -1115,6 +1125,13 @@
             const url = new URL(window.location);
             url.searchParams.set('category', categoryName);
             window.history.pushState({}, '', url);
+          }
+          // Google Analytics tracking
+          if (typeof gtag !== 'undefined') {
+            gtag('event', 'select_content', {
+              content_type: 'category_filter',
+              item_id: categoryName.toLowerCase().replace(/\s+/g, '_')
+            });
           }
         });
         menu.appendChild(button);
