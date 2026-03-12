@@ -2,18 +2,20 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) -->
+  <!-- Google tag (gtag.js) - wrapped in IIFE to prevent iOS WebView crash -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-3T6BZLC6VH"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-3T6BZLC6VH');
+    (function () {
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag('js', new Date());
+      gtag('config', 'G-3T6BZLC6VH');
+    })();
   </script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Inventory Gallery</title>
+  <title>ZariMandir Collection</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap"
     rel="stylesheet">
@@ -144,7 +146,6 @@
       fill: currentColor;
     }
 
-
     .category-nav {
       display: flex;
       flex-wrap: wrap;
@@ -198,27 +199,6 @@
 
     .filters {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      align-items: flex-end;
-      padding: 0;
-    }
-
-    .filter-control {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-secondary);
-    }
-
-
-
-    /* Filters Section */
-    .filters {
-      display: flex;
       flex-wrap: nowrap;
       gap: 0.5rem;
       align-items: center;
@@ -233,8 +213,6 @@
     .filters::-webkit-scrollbar {
       display: none;
     }
-
-
 
     .filter-control {
       display: inline-flex;
@@ -315,7 +293,6 @@
       gap: 0;
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
-      /* Hide scrollbar for cleaner look, but allow scrolling */
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -466,7 +443,6 @@
       grid-column: 1 / -1;
     }
 
-    /* Lightbox */
     .lightbox {
       display: none;
       position: fixed;
@@ -481,19 +457,15 @@
       opacity: 0;
       transition: opacity 0.3s ease;
       overflow: hidden;
-      /* Prevent scrolling when not zoomed */
     }
 
     .lightbox.visible {
       opacity: 1;
     }
 
-    /* Zoomed state for lightbox */
     .lightbox.active-zoom {
       display: block;
-      /* Switch from flex to block to allow scrolling */
       overflow: auto;
-      /* Enable scrolling */
       text-align: center;
     }
 
@@ -503,7 +475,6 @@
       object-fit: contain;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
       cursor: zoom-in;
-      /* Indicate clickable */
       transition: transform 0.2s ease;
     }
 
@@ -513,7 +484,6 @@
       object-fit: contain;
       cursor: zoom-out;
       margin: 20px auto;
-      /* Center horizontally and add vertical space */
     }
 
     .lightbox-close {
@@ -528,7 +498,6 @@
       z-index: 2001;
     }
 
-    /* Lightbox Navigation Arrows */
     .lightbox-nav {
       position: fixed;
       top: 50%;
@@ -556,29 +525,9 @@
       transform: translateY(-50%) scale(1.1);
     }
 
-    .lightbox-nav:active {
-      transform: translateY(-50%) scale(0.95);
-    }
+    .lightbox-nav.prev { left: 20px; }
+    .lightbox-nav.next { right: 20px; }
 
-    .lightbox-nav.prev {
-      left: 20px;
-    }
-
-    .lightbox-nav.next {
-      right: 20px;
-    }
-
-    .lightbox-nav:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .lightbox-nav:disabled:hover {
-      transform: translateY(-50%);
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    /* Image counter */
     .lightbox-counter {
       position: fixed;
       bottom: 20px;
@@ -594,61 +543,12 @@
     }
 
     @media (max-width: 768px) {
-      .lightbox-nav {
-        width: 44px;
-        height: 44px;
-        font-size: 20px;
-      }
-
-      .lightbox-nav.prev {
-        left: 10px;
-      }
-
-      .lightbox-nav.next {
-        right: 10px;
-      }
-
-      .lightbox-close {
-        top: 10px;
-        right: 10px;
-        font-size: 36px;
-      }
-
-      .lightbox-counter {
-        bottom: 10px;
-        font-size: 12px;
-        padding: 6px 12px;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .app-shell {
-        padding: 1.5rem 1rem;
-      }
-
-      .gallery-top {
-        gap: 1.5rem;
-        padding-bottom: 1.5rem;
-      }
-
-      .gallery-header-row {
-        width: 100%;
-        gap: 1rem;
-      }
-
-      .gallery-logo img {
-        height: 50px;
-      }
-
-      .social-icons {
-        gap: 0.75rem;
-      }
-
-      .social-icon {
-        width: 40px;
-        height: 40px;
-      }
-
+      .app-shell { padding: 1.5rem 1rem; }
+      .gallery-top { gap: 1.5rem; padding-bottom: 1.5rem; }
+      .gallery-header-row { width: 100%; gap: 1rem; }
+      .gallery-logo img { height: 50px; }
+      .social-icons { gap: 0.75rem; }
+      .social-icon { width: 40px; height: 40px; }
       .category-nav {
         justify-content: flex-start;
         overflow-x: auto;
@@ -656,41 +556,23 @@
         width: 100%;
         border-bottom: 1px solid #eee;
       }
-
-      .category-nav button {
-        flex-shrink: 0;
-        font-size: 0.75rem;
-      }
-
-
-
-
-
-
-
-      .filter-control label {
-        font-size: 0.75rem;
-      }
-
+      .category-nav button { flex-shrink: 0; font-size: 0.75rem; }
+      .filter-control label { font-size: 0.75rem; }
       .filter-control select {
         font-size: 0.75rem;
         padding: 0.4rem 1.75rem 0.4rem 0.6rem;
-      }
-
-      .filter-control select {
         width: 100%;
         min-width: 0;
       }
-
       #galleryArea {
         grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
         gap: 1.5rem 0.75rem;
       }
-
-      .card img {
-        height: auto;
-        margin-bottom: 0.75rem;
-      }
+      .lightbox-nav { width: 44px; height: 44px; font-size: 20px; }
+      .lightbox-nav.prev { left: 10px; }
+      .lightbox-nav.next { right: 10px; }
+      .lightbox-close { top: 10px; right: 10px; font-size: 36px; }
+      .lightbox-counter { bottom: 10px; font-size: 12px; padding: 6px 12px; }
     }
   </style>
 </head>
@@ -698,21 +580,19 @@
 <body>
   <main class="app-shell">
     <div class="gallery-top">
-      <!-- Top row: Logo + Social Icons -->
       <div class="gallery-header-row">
         <div class="gallery-logo">
-          <!-- ZariMandir Logo -->
           <h1 style="display: flex; align-items: center; gap: 10px;">ZARIMANDIR</h1>
-          <p style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px; cursor: pointer;"
-            onclick="google.script.run.trackEvent('generate_lead', {lead_source: 'instagram_text'}); window.open('https://ig.me/m/zari_mandir', '_blank');">
+          <!-- FIX: Removed google.script.run.trackEvent from onclick (causes iOS crash) -->
+          <p id="dm-link" style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px; cursor: pointer;">
             Kindly place your order via Instagram DM</p>
         </div>
 
-        <!-- Social Icons -->
         <div class="social-icons">
+          <!-- FIX: Removed google.script.run.trackEvent from onclick (causes iOS crash) -->
           <a href="https://www.instagram.com/zari_mandir/" target="_blank" rel="noopener noreferrer"
-            class="social-icon social-icon-instagram" title="Follow us on Instagram"
-            onclick="google.script.run.trackEvent('generate_lead', {lead_source: 'instagram_icon'});">
+            id="instagram-link"
+            class="social-icon social-icon-instagram" title="Follow us on Instagram">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -736,13 +616,11 @@
       </div>
     </div>
 
-    <!-- Bottom row: Category Navigation -->
     <nav class="category-nav" id="folderMenu">
       <span class="nav-placeholder">Loading item folders…</span>
     </nav>
     <div class="gallery-meta" style="display:none;">
       <span id="galleryCount">Preparing the collection…</span>
-    </div>
     </div>
 
     <section class="filters" id="filtersSection">
@@ -779,6 +657,11 @@
   </div>
 
   <script>
+    // ── Apps Script REST endpoint (used for fetching public gallery data) ──
+    // This allows the page to load on ALL browsers including iOS/Instagram WebViews
+    // without depending on the Apps Script sandbox bridge (google.script.run).
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec';
+
     const placeholderImage = 'https://via.placeholder.com/400x300?text=No+Image';
     const SELECTORS = {
       galleryArea: 'galleryArea',
@@ -797,11 +680,20 @@
       selectedWork: ''
     };
 
+    // Safe wrapper for google.script.run tracking (fails silently on iOS)
+    function safeTrackEvent(eventName, params) {
+      try {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run.trackEvent(eventName, params);
+        }
+      } catch (e) { /* silently ignore tracking errors */ }
+    }
+
     function normalizeStatusValue(value) {
       return String(value || '').replace(/\s+/g, '').toUpperCase();
     }
 
-    function setSelectOptions(selectEl, values = []) {
+    function setSelectOptions(selectEl, values) {
       if (!selectEl) return;
       const normalized = (values || []).map(value => String(value || '').trim()).filter(Boolean);
       const unique = Array.from(new Set(normalized)).sort((a, b) => a.localeCompare(b));
@@ -814,7 +706,7 @@
       });
     }
 
-    function applyFilters(items = []) {
+    function applyFilters(items) {
       return (items || []).filter(item => {
         if (state.selectedSize && item.size !== state.selectedSize) return false;
         if (state.selectedWork && item.workStyle !== state.selectedWork) return false;
@@ -836,23 +728,23 @@
     function getGalleryGroupKey(item) {
       const uid = String(item.uid || '').trim();
       const baseUid = uid.replace(/[-_ ]?\d{2,3}$/, '').trim();
-      if (baseUid) return `UID:${baseUid}`;
+      if (baseUid) return 'UID:' + baseUid;
       const fileId = String(item.imageFileId || '').trim();
-      if (fileId) return `FILE:${fileId}`;
+      if (fileId) return 'FILE:' + fileId;
       const imageUrl = String(item.imageUrl || '').trim();
-      if (imageUrl) return `URL:${imageUrl}`;
+      if (imageUrl) return 'URL:' + imageUrl;
       const itemType = String(item.itemType || '').trim();
       const color = String(item.color || '').trim();
       const work = String(item.workStyle || '').trim();
-      return `META:${itemType}|${color}|${work}`;
+      return 'META:' + itemType + '|' + color + '|' + work;
     }
 
-    function groupItemsForGallery(items = []) {
+    function groupItemsForGallery(items) {
       const map = new Map();
       (items || []).forEach(item => {
         const key = getGalleryGroupKey(item);
         if (!map.has(key)) {
-          map.set(key, { key, items: [], representative: item });
+          map.set(key, { key: key, items: [], representative: item });
         }
         const entry = map.get(key);
         entry.items.push(item);
@@ -863,19 +755,19 @@
       return Array.from(map.values());
     }
 
-    function getSortedSizes(items = []) {
+    function getSortedSizes(items) {
       const availableItems = items.filter(item => normalizeStatusValue(item.status) !== 'SOLD');
       const sizes = Array.from(new Set(availableItems.map(item => String(item.size || '').trim()).filter(Boolean)));
-      const getNum = (value) => {
+      const getNum = function(value) {
         const match = String(value || '').match(/\d+/);
         return match ? Number(match[0]) : NaN;
       };
-      sizes.sort((a, b) => {
+      sizes.sort(function(a, b) {
         const na = getNum(a);
         const nb = getNum(b);
-        if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
-        if (!Number.isNaN(na) && Number.isNaN(nb)) return -1;
-        if (Number.isNaN(na) && !Number.isNaN(nb)) return 1;
+        if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
+        if (!isNaN(na) && isNaN(nb)) return -1;
+        if (isNaN(na) && !isNaN(nb)) return 1;
         return a.localeCompare(b);
       });
       return sizes;
@@ -889,7 +781,7 @@
         gallery.innerHTML = '<div class="empty-state">No images match the current filters.</div>';
         return;
       }
-      groups.forEach(group => {
+      groups.forEach(function(group) {
         const item = group.representative;
         const card = document.createElement('article');
         card.className = 'card';
@@ -900,27 +792,20 @@
         const imgContainer = document.createElement('div');
         imgContainer.className = 'card-images';
 
-        // Collect images
         const imagesToRender = [];
         const seenUrls = new Set();
 
-        // 1. Prioritize website images
-        group.items.forEach(gItem => {
+        group.items.forEach(function(gItem) {
           if (gItem.additionalImages && gItem.additionalImages.length > 0) {
-            gItem.additionalImages.forEach(extra => {
+            gItem.additionalImages.forEach(function(extra) {
               if (!seenUrls.has(extra.url)) {
                 seenUrls.add(extra.url);
-                imagesToRender.push({
-                  thumbnailUrl: extra.url,
-                  fullUrl: extra.url,
-                  alt: 'View'
-                });
+                imagesToRender.push({ thumbnailUrl: extra.url, fullUrl: extra.url, alt: 'View' });
               }
             });
           }
         });
 
-        // 2. Add capture image
         const mainUrl = item.thumbnailUrl || item.imageUrl;
         if (mainUrl) {
           if (!seenUrls.has(mainUrl)) {
@@ -932,22 +817,17 @@
             });
           }
         } else if (imagesToRender.length === 0) {
-          imagesToRender.push({
-            thumbnailUrl: placeholderImage,
-            fullUrl: placeholderImage,
-            alt: 'No Image'
-          });
+          imagesToRender.push({ thumbnailUrl: placeholderImage, fullUrl: placeholderImage, alt: 'No Image' });
         }
 
-        // Render images
-        imagesToRender.forEach((imgData, index) => {
+        imagesToRender.forEach(function(imgData, index) {
           const img = document.createElement('img');
           img.src = imgData.thumbnailUrl || imgData.url;
           img.setAttribute('data-full-url', imgData.fullUrl || imgData.url);
           img.setAttribute('data-image-index', index);
-          img.setAttribute('data-image-group', JSON.stringify(imagesToRender.map(i => i.fullUrl || i.url)));
+          img.setAttribute('data-image-group', JSON.stringify(imagesToRender.map(function(i) { return i.fullUrl || i.url; })));
           img.alt = imgData.alt;
-          img.onclick = () => {
+          img.onclick = function() {
             const imageGroup = JSON.parse(img.getAttribute('data-image-group'));
             const startIndex = parseInt(img.getAttribute('data-image-index'));
             openLightbox(imageGroup, startIndex);
@@ -957,7 +837,6 @@
 
         imgWrapper.appendChild(imgContainer);
 
-        // Render dots
         if (imagesToRender.length > 0) {
           const dotsContainer = document.createElement('div');
           dotsContainer.className = 'dots-container';
@@ -968,8 +847,7 @@
           }
           imgWrapper.appendChild(dotsContainer);
 
-          // Scroll listener for dots
-          imgContainer.addEventListener('scroll', () => {
+          imgContainer.addEventListener('scroll', function() {
             const width = imgContainer.clientWidth;
             if (width > 0) {
               const index = Math.round(imgContainer.scrollLeft / width);
@@ -981,19 +859,18 @@
             }
           }, { passive: true });
 
-          // Navigation arrows for mouse users
           if (imagesToRender.length > 1) {
             const prevBtn = document.createElement('button');
             prevBtn.className = 'nav-btn prev';
             prevBtn.innerHTML = '&lsaquo;';
-            prevBtn.onclick = (e) => {
+            prevBtn.onclick = function(e) {
               e.stopPropagation();
               imgContainer.scrollBy({ left: -imgContainer.clientWidth, behavior: 'smooth' });
             };
             const nextBtn = document.createElement('button');
             nextBtn.className = 'nav-btn next';
             nextBtn.innerHTML = '&rsaquo;';
-            nextBtn.onclick = (e) => {
+            nextBtn.onclick = function(e) {
               e.stopPropagation();
               imgContainer.scrollBy({ left: imgContainer.clientWidth, behavior: 'smooth' });
             };
@@ -1007,12 +884,9 @@
         const content = document.createElement('div');
         content.className = 'card-content';
 
-        // Description: ITEM TYPE + FABRIC + WORK STYLE + "IN" + COLOR
         const descParts = [item.itemType, item.fabric, item.workStyle].filter(Boolean);
         let descText = descParts.join(' ');
-        if (item.color) {
-          descText += (descText ? ' IN ' : '') + item.color;
-        }
+        if (item.color) descText += (descText ? ' IN ' : '') + item.color;
         const desc = document.createElement('h3');
         desc.className = 'item-description';
         desc.textContent = descText || 'Item';
@@ -1044,9 +918,9 @@
 
     function updateFilterOptions(folder) {
       if (!folder) return;
-      const sizes = Array.from(new Set(folder.items.map(item => item.size).filter(Boolean)));
-      const colors = Array.from(new Set(folder.items.map(item => item.color).filter(Boolean)));
-      const works = Array.from(new Set(folder.items.map(item => item.workStyle).filter(Boolean)));
+      const sizes = Array.from(new Set(folder.items.map(function(item) { return item.size; }).filter(Boolean)));
+      const colors = Array.from(new Set(folder.items.map(function(item) { return item.color; }).filter(Boolean)));
+      const works = Array.from(new Set(folder.items.map(function(item) { return item.workStyle; }).filter(Boolean)));
       setSelectOptions(document.getElementById(SELECTORS.sizeFilter), sizes);
       setSelectOptions(document.getElementById(SELECTORS.colorFilter), colors);
       setSelectOptions(document.getElementById(SELECTORS.workFilter), works);
@@ -1061,24 +935,19 @@
     function updateGalleryCount(folder, filteredCount, totalCount) {
       const galleryCount = document.getElementById(SELECTORS.galleryCount);
       if (!galleryCount) return;
-      if (!folder) {
-        galleryCount.textContent = '0 ITEMS';
-        return;
-      }
-      const total = typeof totalCount === 'number'
-        ? totalCount
-        : (Array.isArray(folder.items) ? folder.items.length : 0);
+      if (!folder) { galleryCount.textContent = '0 ITEMS'; return; }
+      const total = typeof totalCount === 'number' ? totalCount : (Array.isArray(folder.items) ? folder.items.length : 0);
       const folderLabel = folder.folderName || 'Untitled';
       if (typeof filteredCount === 'number' && filteredCount !== total) {
-        galleryCount.textContent = `${folderLabel} - Showing ${filteredCount} of ${total}`;
+        galleryCount.textContent = folderLabel + ' - Showing ' + filteredCount + ' of ' + total;
       } else {
-        galleryCount.textContent = `${folderLabel} - ${total} ITEMS`;
+        galleryCount.textContent = folderLabel + ' - ' + total + ' ITEMS';
       }
     }
 
     function updateMenuActiveState() {
-      const buttons = document.getElementById(SELECTORS.folderMenu)?.querySelectorAll('button') || [];
-      buttons.forEach((button, index) => {
+      const buttons = document.getElementById(SELECTORS.folderMenu).querySelectorAll('button') || [];
+      buttons.forEach(function(button, index) {
         button.classList.toggle('active', index === state.activeIndex);
       });
     }
@@ -1110,22 +979,21 @@
         document.getElementById(SELECTORS.galleryCount).textContent = 'NO ITEMS';
         return;
       }
-      state.folders.forEach((folder, index) => {
+      state.folders.forEach(function(folder, index) {
         const button = document.createElement('button');
-        const countLabel = folder.count ? ` (${folder.count})` : '';
+        const countLabel = folder.count ? ' (' + folder.count + ')' : '';
         button.type = 'button';
-        button.textContent = `${folder.folderName || 'Untitled'}${countLabel}`;
-        button.addEventListener('click', () => {
+        button.textContent = (folder.folderName || 'Untitled') + countLabel;
+        button.addEventListener('click', function() {
           handleFolderSelection(index);
-          // Update URL with category parameter for shareable links
           const categoryName = folder.folderName || '';
           if (categoryName) {
             const url = new URL(window.location);
             url.searchParams.set('category', categoryName);
             window.history.pushState({}, '', url);
           }
-          // Google Analytics tracking - server-side
-          google.script.run.trackEvent('select_content', {
+          // FIX: safeTrackEvent won't crash on iOS if google.script.run is unavailable
+          safeTrackEvent('select_content', {
             content_type: 'category_filter',
             item_id: categoryName.toLowerCase().replace(/\s+/g, '_')
           });
@@ -1142,81 +1010,47 @@
       const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
       const colorSelect = document.getElementById(SELECTORS.colorFilter);
       const workSelect = document.getElementById(SELECTORS.workFilter);
-
-      if (sizeSelect) {
-        sizeSelect.addEventListener('change', event => {
-          state.selectedSize = event.target.value;
-          renderCurrentFolder();
-        });
-      }
-      if (colorSelect) {
-        colorSelect.addEventListener('change', event => {
-          state.selectedColor = event.target.value;
-          renderCurrentFolder();
-        });
-      }
-      if (workSelect) {
-        workSelect.addEventListener('change', event => {
-          state.selectedWork = event.target.value;
-          renderCurrentFolder();
-        });
-      }
+      if (sizeSelect) sizeSelect.addEventListener('change', function(e) { state.selectedSize = e.target.value; renderCurrentFolder(); });
+      if (colorSelect) colorSelect.addEventListener('change', function(e) { state.selectedColor = e.target.value; renderCurrentFolder(); });
+      if (workSelect) workSelect.addEventListener('change', function(e) { state.selectedWork = e.target.value; renderCurrentFolder(); });
     }
 
     function handleData(response) {
       const rawFolders = Array.isArray(response.folders) ? response.folders : [];
-
-      // Merge folders with the same name to prevent duplicates
       const mergedMap = new Map();
 
-      rawFolders.forEach(folder => {
-        // Filter out SOLD items
-        const validItems = (folder.items || []).filter(item => normalizeStatusValue(item.status) !== 'SOLD');
-
+      rawFolders.forEach(function(folder) {
+        const validItems = (folder.items || []).filter(function(item) { return normalizeStatusValue(item.status) !== 'SOLD'; });
         if (validItems.length === 0) return;
-
         const name = folder.folderName || 'Untitled';
         const key = name.trim().toUpperCase();
-
-        // Filter out meta-folders that shouldn't be categories
         if (key === 'GALLERY' || key === 'CONTACT' || key === 'HOME') return;
-
         if (!mergedMap.has(key)) {
-          mergedMap.set(key, { ...folder, items: [...validItems], count: validItems.length });
+          mergedMap.set(key, Object.assign({}, folder, { items: validItems.slice(), count: validItems.length }));
         } else {
           const existing = mergedMap.get(key);
-          existing.items.push(...validItems);
+          existing.items.push.apply(existing.items, validItems);
           existing.count += validItems.length;
         }
       });
 
       let folders = Array.from(mergedMap.values());
-
-      // Check URL parameters for category
       const urlParams = new URLSearchParams(window.location.search);
       const categoryParam = urlParams.get('category');
-
       let defaultIndex = 0;
 
       if (categoryParam) {
-        // If category is specified in URL, try to find and use it
-        const paramIndex = folders.findIndex(f =>
-          (f.folderName || '').trim().toUpperCase() === categoryParam.trim().toUpperCase()
-        );
-        if (paramIndex >= 0) {
-          defaultIndex = paramIndex;
-        }
+        const paramIndex = folders.findIndex(function(f) {
+          return (f.folderName || '').trim().toUpperCase() === categoryParam.trim().toUpperCase();
+        });
+        if (paramIndex >= 0) defaultIndex = paramIndex;
       } else {
-        // Default behavior: Find and move "3 PIECE" to the front
-        const defaultCategory = "3 PIECE";
-        const threePieceIndex = folders.findIndex(f =>
-          (f.folderName || '').trim().toUpperCase() === defaultCategory
-        );
+        const threePieceIndex = folders.findIndex(function(f) {
+          return (f.folderName || '').trim().toUpperCase() === '3 PIECE';
+        });
         if (threePieceIndex > 0) {
-          const [defaultFolder] = folders.splice(threePieceIndex, 1);
+          const defaultFolder = folders.splice(threePieceIndex, 1)[0];
           folders.unshift(defaultFolder);
-          defaultIndex = 0;
-        } else if (threePieceIndex === 0) {
           defaultIndex = 0;
         }
       }
@@ -1234,104 +1068,89 @@
       const gallery = document.getElementById(SELECTORS.galleryArea);
       const count = document.getElementById(SELECTORS.galleryCount);
       if (menu) menu.innerHTML = '';
-      if (gallery) gallery.innerHTML = `<div class="empty-state">Failed to load gallery: ${err && err.message ? err.message : 'Unknown error'}</div>`;
+      if (gallery) gallery.innerHTML = '<div class="empty-state">Failed to load gallery: ' + (err && err.message ? err.message : 'Unknown error') + '</div>';
       if (count) count.textContent = 'FAILED';
     }
 
     function init() {
       bindFilterListeners();
 
-      // Check if running in local development mode
+      // Attach DM link and Instagram tracking safely (no inline onclick)
+      var dmLink = document.getElementById('dm-link');
+      if (dmLink) {
+        dmLink.addEventListener('click', function() {
+          safeTrackEvent('generate_lead', { lead_source: 'instagram_text' });
+          window.open('https://ig.me/m/zari_mandir', '_blank');
+        });
+      }
+      var igLink = document.getElementById('instagram-link');
+      if (igLink) {
+        igLink.addEventListener('click', function() {
+          safeTrackEvent('generate_lead', { lead_source: 'instagram_icon' });
+        });
+      }
+
       const isLocalDev = window.location.protocol === 'file:' ||
         window.location.hostname === 'localhost' ||
         window.location.hostname === '127.0.0.1';
 
       if (isLocalDev && window.MOCK_GALLERY_DATA) {
-        console.log('🔧 LOCAL DEV MODE: Using mock data');
-        // Use mock data for local testing
         handleData(window.MOCK_GALLERY_DATA);
-      } else {
-        console.log('🚀 PRODUCTION MODE: Fetching real data from Apps Script');
-        // Use real Apps Script API - PUBLIC version (no sensitive pricing/supplier data)
-        google.script.run
-          .withSuccessHandler(handleData)
-          .withFailureHandler(handleError)
-          .itemGetPublicFoldersWithImages();
+        return;
       }
+
+      // FIX: Use REST fetch() instead of google.script.run — works on all browsers including iOS/Instagram
+      fetch(APPS_SCRIPT_URL + '?page=gallery-data&t=' + Date.now())
+        .then(function(res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(handleData)
+        .catch(handleError);
     }
 
-    // Lightbox functionality - Make globally accessible for inline onclick handlers
-    let currentImageGroup = [];
-    let currentImageIndex = 0;
+    // Lightbox
+    var currentImageGroup = [];
+    var currentImageIndex = 0;
 
-    window.openLightbox = function (imageGroup, startIndex = 0) {
+    window.openLightbox = function(imageGroup, startIndex) {
+      startIndex = startIndex || 0;
       const lightbox = document.getElementById('lightbox');
       const lightboxImg = document.getElementById('lightbox-img');
       if (!lightbox || !lightboxImg) return;
-
-      // Store image group and index
       currentImageGroup = Array.isArray(imageGroup) ? imageGroup : [imageGroup];
       currentImageIndex = startIndex;
-
-      // Display the image
       lightboxImg.src = currentImageGroup[currentImageIndex];
       lightbox.style.display = 'flex';
-
-      // Update navigation buttons and counter
       updateLightboxNavigation();
-
-      // Prevent body scrolling when lightbox is open
       document.body.style.overflow = 'hidden';
-
-      // Trigger fade-in animation
-      setTimeout(() => lightbox.classList.add('visible'), 10);
+      setTimeout(function() { lightbox.classList.add('visible'); }, 10);
     };
 
-    window.closeLightbox = function () {
+    window.closeLightbox = function() {
       const lightbox = document.getElementById('lightbox');
       if (!lightbox) return;
-
-      // Fade out
       lightbox.classList.remove('visible');
       lightbox.classList.remove('active-zoom');
-
-      // Re-enable body scrolling
       document.body.style.overflow = '';
-
-      // Hide after animation
-      setTimeout(() => {
-        lightbox.style.display = 'none';
-      }, 300);
-
-      // Reset image group
+      setTimeout(function() { lightbox.style.display = 'none'; }, 300);
       currentImageGroup = [];
       currentImageIndex = 0;
     };
 
-    window.toggleZoom = function (event) {
+    window.toggleZoom = function(event) {
       event.stopPropagation();
       const lightbox = document.getElementById('lightbox');
-      if (!lightbox) return;
-
-      lightbox.classList.toggle('active-zoom');
+      if (lightbox) lightbox.classList.toggle('active-zoom');
     };
 
-    window.navigateLightbox = function (direction) {
+    window.navigateLightbox = function(direction) {
       if (currentImageGroup.length <= 1) return;
-
       currentImageIndex += direction;
-
-      // Wrap around
       if (currentImageIndex < 0) currentImageIndex = currentImageGroup.length - 1;
       if (currentImageIndex >= currentImageGroup.length) currentImageIndex = 0;
-
-      // Update image
       const lightboxImg = document.getElementById('lightbox-img');
-      if (lightboxImg) {
-        lightboxImg.src = currentImageGroup[currentImageIndex];
-      }
-
-      // Update navigation
+      if (lightboxImg) lightboxImg.src = currentImageGroup[currentImageIndex];
       updateLightboxNavigation();
     };
 
@@ -1339,12 +1158,8 @@
       const prevBtn = document.getElementById('lightbox-prev');
       const nextBtn = document.getElementById('lightbox-next');
       const counter = document.getElementById('lightbox-counter');
-
       if (prevBtn && nextBtn && counter) {
-        // Update counter
-        counter.textContent = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
-
-        // Hide navigation if only one image
+        counter.textContent = (currentImageIndex + 1) + ' / ' + currentImageGroup.length;
         const hasMultiple = currentImageGroup.length > 1;
         prevBtn.style.display = hasMultiple ? 'flex' : 'none';
         nextBtn.style.display = hasMultiple ? 'flex' : 'none';
@@ -1352,39 +1167,16 @@
       }
     }
 
-    // Keyboard navigation
-    document.addEventListener('keydown', function (e) {
+    document.addEventListener('keydown', function(e) {
       const lightbox = document.getElementById('lightbox');
       if (!lightbox || lightbox.style.display === 'none') return;
-
-      if (e.key === 'ArrowLeft') {
-        navigateLightbox(-1);
-      } else if (e.key === 'ArrowRight') {
-        navigateLightbox(1);
-      } else if (e.key === 'Escape') {
-        closeLightbox();
-      }
+      if (e.key === 'ArrowLeft') navigateLightbox(-1);
+      else if (e.key === 'ArrowRight') navigateLightbox(1);
+      else if (e.key === 'Escape') closeLightbox();
     });
 
     window.addEventListener('load', init);
   </script>
-
-  <script>
-    function sendHeight() {
-      const height = document.body.scrollHeight;
-      // Sends height to the parent window (Hostinger)
-      window.parent.postMessage({ 'height': height }, "*");
-    }
-
-    // Send height when the page loads and whenever the window is resized
-    window.addEventListener('load', sendHeight);
-    window.addEventListener('resize', sendHeight);
-
-    // Optional: Monitor content changes (e.g., loading images in your gallery)
-    const observer = new ResizeObserver(sendHeight);
-    observer.observe(document.body);
-  </script>
-
 </body>
 
 </html>
