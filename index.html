@@ -1,67 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ZariMandir Collection</title>
-    <style>
-        :root {
-            --bg-primary: #FAFAF8;
-            /* Matches gallery background */
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-primary);
-            overflow: hidden;
-            /* Prevent wrapper scrollbars */
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Iframe Container */
-        #gas-container {
-            width: 100%;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        #gas-iframe {
-            width: 100%;
-            border: none;
-            display: block;
-            flex: 1;
-            min-height: 100vh;
-            /* Height will be updated dynamically by the script below */
-        }
-    </style>
-</head>
-
-<body>
-
-    <div id="gas-container">
-        <iframe id="gas-iframe"
-            src="https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec?page=gallery"
-            title="ZariMandir Collection" allow="clipboard-write" scrolling="no">
-        </iframe>
-    </div>
-
+    <!-- Redirect directly to Apps Script URL (no iframe).
+         This fixes the blank "undefined" screen on iOS/Instagram WebViews
+         caused by Apple blocking cross-origin iframes from script.google.com. -->
+    <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec?page=gallery">
     <script>
-        // Listen for height adjustments from the GAS page
-        window.addEventListener('message', function (event) {
-            if (event.data && event.data.height) {
-                const iframe = document.getElementById('gas-iframe');
-                if (iframe) {
-                    // Set height to content height + small buffer
-                    iframe.style.height = (event.data.height + 60) + 'px';
-                }
-            }
-        }, false);
+        window.location.replace('https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec?page=gallery');
     </script>
+</head>
+<body>
+    <p style="font-family:sans-serif; padding:2rem; color:#555;">
+        Loading ZariMandir Collection&hellip;
+        <a href="https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec?page=gallery">
+            Click here if not redirected
+        </a>
+    </p>
 </body>
-
 </html>
