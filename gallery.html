@@ -2,10 +2,53 @@
 <html lang="en">
 
 <head>
-  <!-- Google tag (gtag.js) - wrapped in IIFE to prevent iOS WebView crash -->
+  <!-- iOS Safari / Instagram WebView: Apps Script sandbox bridge may be blocked.
+       This stub prevents the "undefined" crash by providing a safe no-op proxy. -->
+  <script>
+    (function() {
+      if (typeof google === 'undefined' || !google.script) {
+        var makeRunner = function() {
+          var runner = {
+            withSuccessHandler: function(fn) { runner._success = fn; return runner; },
+            withFailureHandler: function(fn) { runner._failure = fn; return runner; }
+          };
+          return runner;
+        };
+        window.google = {
+          script: {
+            run: new Proxy({}, {
+              get: function(_, prop) {
+                return function() { return makeRunner(); };
+              }
+            }),
+            history: { push: function() {}, replace: function() {} },
+            url: { location: function(fn) { fn({}); } }
+          }
+        };
+      }
+    })();
+  </script>
+
+  <!-- Global Error Handler to catch fatal WebKit render crashes early -->
+  <script>
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      console.error('Global Error: ', msg, url, lineNo, columnNo, error);
+      // Wait for DOM to be ready before trying to write error, to preserve body
+      document.addEventListener('DOMContentLoaded', function() {
+         var errEl = document.getElementById('fatal-error-display');
+         if(errEl) {
+           errEl.innerHTML = 'Sorry, the gallery failed to load on this device browser. <br/><small>' + msg + '</small>';
+           errEl.style.display = 'block';
+         }
+      });
+      return false;
+    };
+  </script>
+
+  <!-- Google tag (gtag.js) securely wrapped for strict WebViews -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-3T6BZLC6VH"></script>
   <script>
-    (function () {
+    (function(){
       window.dataLayer = window.dataLayer || [];
       function gtag() { dataLayer.push(arguments); }
       gtag('js', new Date());
@@ -15,7 +58,7 @@
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ZariMandir Collection</title>
+  <title>Inventory Gallery</title>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@600;700&display=swap"
     rel="stylesheet">
@@ -65,18 +108,18 @@
     .app-shell {
       max-width: 1280px;
       margin: 0 auto;
-      padding: 1rem 1.5rem 3rem;
+      padding: 0.5rem 1.5rem 2rem;
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.5rem;
     }
 
     .gallery-top {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
+      gap: 0.4rem;
       border-bottom: 1px solid var(--border-light);
-      padding-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
       margin-bottom: 0;
     }
 
@@ -97,10 +140,7 @@
       font-family: 'Playfair Display', serif;
       font-weight: 700;
       letter-spacing: 0.08em;
-      background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #EC4899 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      color: #C9961A;
     }
 
     .gallery-logo img {
@@ -146,18 +186,27 @@
       fill: currentColor;
     }
 
+
     .category-nav {
       display: flex;
-      flex-wrap: wrap;
-      gap: 1.5rem;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
       align-items: center;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 0.1rem;
+    }
+
+    .category-nav::-webkit-scrollbar {
+      display: none;
     }
 
     .category-nav button {
       border: none;
       background: transparent;
       color: var(--text-secondary);
-      padding: 0.75rem 1.5rem;
+      padding: 0.45rem 1rem;
       font-size: 0.8125rem;
       letter-spacing: 0.5px;
       text-transform: uppercase;
@@ -199,6 +248,63 @@
 
     .filters {
       display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: flex-end;
+      padding: 0;
+    }
+
+    .filter-control {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-secondary);
+    }
+
+
+
+    /* Filters Section */
+    .filters {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0;
+      transition: all var(--transition);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      padding-bottom: 0.25rem;
+    }
+
+    .filters::-webkit-scrollbar {
+      display: none;
+    }
+
+
+
+    .filter-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .filter-control label {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    /* ── Filter dropdowns ─────────────────────────────────────── */
+    .filters {
+      display: flex;
       flex-wrap: nowrap;
       gap: 0.5rem;
       align-items: center;
@@ -226,36 +332,155 @@
       font-size: 0.8125rem;
       font-weight: 500;
       color: var(--text-secondary);
-      text-transform: none;
-      letter-spacing: 0;
     }
 
-    .filter-control select {
+    /* ── Custom multi-select dropdown ────────────────────────────── */
+    .multi-select-wrap {
+      position: relative;
+      display: inline-block;
+    }
+
+    .multi-select-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
       border: 1px solid var(--border-medium);
       border-radius: var(--radius-sm);
       background: var(--bg-secondary);
-      padding: 0.5rem 2rem 0.5rem 0.75rem;
+      padding: 0.45rem 1.75rem 0.45rem 0.75rem;
       font-size: 0.8125rem;
       color: var(--text-primary);
-      min-width: auto;
       cursor: pointer;
-      appearance: none;
+      font-family: inherit;
+      font-weight: 400;
+      width: 130px;
+      max-width: 130px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: border-color var(--transition);
       background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%232C2C2C%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
       background-repeat: no-repeat;
-      background-position: right 0.5rem top 50%;
+      background-position: right 0.5rem center;
       background-size: 0.5em auto;
-      transition: border-color var(--transition);
-      font-weight: 400;
+      user-select: none;
     }
 
-    .filter-control select:hover {
+    .multi-select-trigger:hover,
+    .multi-select-wrap.open .multi-select-trigger {
       border-color: var(--primary);
     }
 
-    .filter-control select:focus {
-      outline: none;
+    .multi-select-trigger.has-selection {
       border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(44, 44, 44, 0.05);
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    .multi-select-panel {
+      display: none;
+      position: fixed;
+      min-width: 160px;
+      max-height: 220px;
+      overflow-y: auto;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-medium);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-md);
+      z-index: 9999;
+      padding: 0.3rem 0;
+    }
+
+    .multi-select-wrap.open .multi-select-panel {
+      display: block;
+    }
+
+    .multi-select-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background 0.1s;
+      user-select: none;
+    }
+
+    .multi-select-option:hover {
+      background: var(--bg-primary);
+    }
+
+    .multi-select-option input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 13px;
+      height: 13px;
+      flex-shrink: 0;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    /* ── Size chips (inline tappable, compact) ───────────────────── */
+    .size-filter-chips {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 0.3rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .size-filter-chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .size-filter-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.3rem 0.6rem;
+      border: 1.5px solid var(--border-medium);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .size-filter-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .size-filter-chip.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .filter-reset {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.35rem 0.75rem;
+      border: 1.5px solid #e0a0a0;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: #c0392b;
+      background: transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .filter-reset:hover {
+      background: #fff0ef;
+      border-color: #c0392b;
     }
 
     #galleryArea {
@@ -263,6 +488,94 @@
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem 1rem;
       margin-top: 0.5rem;
+    }
+
+    /* ── Skeleton shimmer loading cards ──────────────────────────────────── */
+    .skeleton-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .skeleton-img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    .skeleton-line {
+      height: 0.85rem;
+      border-radius: 4px;
+      background: linear-gradient(90deg, #ececec 25%, #f5f5f5 50%, #ececec 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    .skeleton-line.short {
+      width: 55%;
+    }
+
+    .skeleton-line.xshort {
+      width: 35%;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
+
+    /* ── DM to Order hover button ─────────────────────────────────────────── */
+    .dm-btn {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 0.65rem 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #fff;
+      background: linear-gradient(to right, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+      border: none;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 4;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      text-decoration: none;
+    }
+
+    .image-wrapper:hover .dm-btn {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .dm-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* On touch screens there is no hover — always show the DM button */
+    @media (hover: none) {
+      .dm-btn {
+        opacity: 0.9;
+        transform: translateY(0);
+      }
     }
 
     .card {
@@ -293,6 +606,7 @@
       gap: 0;
       scroll-behavior: smooth;
       scroll-snap-type: x mandatory;
+      /* Hide scrollbar for cleaner look, but allow scrolling */
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -321,29 +635,44 @@
 
     .dots-container {
       position: absolute;
-      bottom: 12px;
+      bottom: 10px;
       left: 0;
       right: 0;
       display: flex;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       pointer-events: none;
       z-index: 2;
     }
 
+    /* Instagram-style dots: white, small, active = opaque */
     .dot {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
       border-radius: 50%;
-      background-color: rgba(0, 0, 0, 0.6);
+      background-color: rgba(255, 255, 255, 0.5);
       transition: all 0.2s ease;
-      box-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
     }
 
     .dot.active {
-      background-color: #007bff;
-      transform: scale(1.2);
-      box-shadow: none;
+      background-color: rgba(255, 255, 255, 1);
+      transform: scale(1.3);
+    }
+
+    /* Instagram-style stacked-images badge (top-right corner) */
+    .multi-img-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0.92;
+    }
+
+    .multi-img-badge svg {
+      width: 22px;
+      height: 22px;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
     }
 
     .nav-btn {
@@ -443,6 +772,7 @@
       grid-column: 1 / -1;
     }
 
+    /* Lightbox */
     .lightbox {
       display: none;
       position: fixed;
@@ -457,15 +787,19 @@
       opacity: 0;
       transition: opacity 0.3s ease;
       overflow: hidden;
+      /* Prevent scrolling when not zoomed */
     }
 
     .lightbox.visible {
       opacity: 1;
     }
 
+    /* Zoomed state for lightbox */
     .lightbox.active-zoom {
       display: block;
+      /* Switch from flex to block to allow scrolling */
       overflow: auto;
+      /* Enable scrolling */
       text-align: center;
     }
 
@@ -475,6 +809,7 @@
       object-fit: contain;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
       cursor: zoom-in;
+      /* Indicate clickable */
       transition: transform 0.2s ease;
     }
 
@@ -484,6 +819,7 @@
       object-fit: contain;
       cursor: zoom-out;
       margin: 20px auto;
+      /* Center horizontally and add vertical space */
     }
 
     .lightbox-close {
@@ -498,6 +834,7 @@
       z-index: 2001;
     }
 
+    /* Lightbox Navigation Arrows */
     .lightbox-nav {
       position: fixed;
       top: 50%;
@@ -525,9 +862,29 @@
       transform: translateY(-50%) scale(1.1);
     }
 
-    .lightbox-nav.prev { left: 20px; }
-    .lightbox-nav.next { right: 20px; }
+    .lightbox-nav:active {
+      transform: translateY(-50%) scale(0.95);
+    }
 
+    .lightbox-nav.prev {
+      left: 20px;
+    }
+
+    .lightbox-nav.next {
+      right: 20px;
+    }
+
+    .lightbox-nav:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .lightbox-nav:disabled:hover {
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Image counter */
     .lightbox-counter {
       position: fixed;
       bottom: 20px;
@@ -543,12 +900,61 @@
     }
 
     @media (max-width: 768px) {
-      .app-shell { padding: 1.5rem 1rem; }
-      .gallery-top { gap: 1.5rem; padding-bottom: 1.5rem; }
-      .gallery-header-row { width: 100%; gap: 1rem; }
-      .gallery-logo img { height: 50px; }
-      .social-icons { gap: 0.75rem; }
-      .social-icon { width: 40px; height: 40px; }
+      .lightbox-nav {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+      }
+
+      .lightbox-nav.prev {
+        left: 10px;
+      }
+
+      .lightbox-nav.next {
+        right: 10px;
+      }
+
+      .lightbox-close {
+        top: 10px;
+        right: 10px;
+        font-size: 36px;
+      }
+
+      .lightbox-counter {
+        bottom: 10px;
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-shell {
+        padding: 1.5rem 1rem;
+      }
+
+      .gallery-top {
+        gap: 1.5rem;
+        padding-bottom: 1.5rem;
+      }
+
+      .gallery-header-row {
+        width: 100%;
+        gap: 1rem;
+      }
+
+      .gallery-logo img {
+        height: 50px;
+      }
+
+      .social-icons {
+        gap: 0.75rem;
+      }
+
+      .social-icon {
+        width: 40px;
+        height: 40px;
+      }
+
       .category-nav {
         justify-content: flex-start;
         overflow-x: auto;
@@ -556,43 +962,85 @@
         width: 100%;
         border-bottom: 1px solid #eee;
       }
-      .category-nav button { flex-shrink: 0; font-size: 0.75rem; }
-      .filter-control label { font-size: 0.75rem; }
-      .filter-control select {
+
+      .category-nav button {
+        flex-shrink: 0;
         font-size: 0.75rem;
-        padding: 0.4rem 1.75rem 0.4rem 0.6rem;
-        width: 100%;
-        min-width: 0;
       }
+
+
       #galleryArea {
         grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
         gap: 1.5rem 0.75rem;
       }
-      .lightbox-nav { width: 44px; height: 44px; font-size: 20px; }
-      .lightbox-nav.prev { left: 10px; }
-      .lightbox-nav.next { right: 10px; }
-      .lightbox-close { top: 10px; right: 10px; font-size: 36px; }
-      .lightbox-counter { bottom: 10px; font-size: 12px; padding: 6px 12px; }
+
+      .card img {
+        height: auto;
+        margin-bottom: 0.75rem;
+      }
+    }
+
+    /* Size availability pills */
+    .size-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.25rem;
+    }
+
+    .size-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.2rem 0.55rem;
+      border: 1.5px solid var(--primary, #2C2C2C);
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: var(--primary, #2C2C2C);
+      background: transparent;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .size-pill.sold-out {
+      border-color: #ccc;
+      color: #bbb;
+      text-decoration: line-through;
+      position: relative;
+    }
+
+    .size-pill.sold-out .pill-x {
+      text-decoration: none;
+      font-size: 0.75rem;
+      line-height: 1;
+      color: #ccc;
     }
   </style>
 </head>
 
 <body>
+  <!-- Fallback global error banner (hidden by default) -->
+  <div id="fatal-error-display" style="display:none; padding:2rem; text-align:center; color:#c0392b; background:#fff0ef; font-weight:500;"></div>
+
   <main class="app-shell">
     <div class="gallery-top">
+      <!-- Top row: Logo + Social Icons -->
       <div class="gallery-header-row">
         <div class="gallery-logo">
+          <!-- ZariMandir Logo -->
           <h1 style="display: flex; align-items: center; gap: 10px;">ZARIMANDIR</h1>
-          <!-- FIX: Removed google.script.run.trackEvent from onclick (causes iOS crash) -->
-          <p id="dm-link" style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px; cursor: pointer;">
+          <p style="margin:0.25rem 0 0 0; font-size:0.7rem; color:var(--text-secondary); font-weight:400; letter-spacing:0.3px; cursor: pointer;"
+            onclick="google.script.run.trackEvent('generate_lead', {lead_source: 'instagram_text'}); window.open('https://ig.me/m/zari_mandir', '_blank');">
             Kindly place your order via Instagram DM</p>
         </div>
 
+        <!-- Social Icons -->
         <div class="social-icons">
-          <!-- FIX: Removed google.script.run.trackEvent from onclick (causes iOS crash) -->
           <a href="https://www.instagram.com/zari_mandir/" target="_blank" rel="noopener noreferrer"
-            id="instagram-link"
-            class="social-icon social-icon-instagram" title="Follow us on Instagram">
+            class="social-icon social-icon-instagram" title="Follow us on Instagram"
+            onclick="google.script.run.trackEvent('generate_lead', {lead_source: 'instagram_icon'});">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <defs>
                 <linearGradient id="instagram-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
@@ -616,32 +1064,35 @@
       </div>
     </div>
 
+    <!-- Bottom row: Category Navigation -->
     <nav class="category-nav" id="folderMenu">
       <span class="nav-placeholder">Loading item folders…</span>
     </nav>
     <div class="gallery-meta" style="display:none;">
       <span id="galleryCount">Preparing the collection…</span>
     </div>
+    </div>
 
     <section class="filters" id="filtersSection">
       <div class="filter-control">
-        <label for="sizeFilter">Size</label>
-        <select id="sizeFilter">
-          <option value="">All</option>
-        </select>
+        <label>Size</label>
+        <div class="size-filter-chips" id="sizeChips"></div>
       </div>
       <div class="filter-control">
-        <label for="colorFilter">Color</label>
-        <select id="colorFilter">
-          <option value="">All</option>
-        </select>
+        <label>Color</label>
+        <div class="multi-select-wrap" id="colorFilterWrap">
+          <div class="multi-select-trigger" id="colorFilterTrigger">All</div>
+          <div class="multi-select-panel" id="colorFilterPanel"></div>
+        </div>
       </div>
       <div class="filter-control">
-        <label for="workFilter">Work Style</label>
-        <select id="workFilter">
-          <option value="">All</option>
-        </select>
+        <label>Work Style</label>
+        <div class="multi-select-wrap" id="workFilterWrap">
+          <div class="multi-select-trigger" id="workFilterTrigger">All</div>
+          <div class="multi-select-panel" id="workFilterPanel"></div>
+        </div>
       </div>
+      <button class="filter-reset" id="filterReset" onclick="resetAllFilters()" style="display:none">✕ Reset</button>
     </section>
     <div id="galleryArea"></div>
   </main>
@@ -657,63 +1108,39 @@
   </div>
 
   <script>
-    // ── Apps Script REST endpoint (used for fetching public gallery data) ──
-    // This allows the page to load on ALL browsers including iOS/Instagram WebViews
-    // without depending on the Apps Script sandbox bridge (google.script.run).
+    // Apps Script deployment URL — used when gallery is served from GitHub Pages directly
+    // (not inside the Apps Script sandbox where google.script.run is available)
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_zkQ-UvUtorctE992Pyp19s7IZQD6EZDsNERIBAz360464eshsdgJz1EceL5kt36f/exec';
 
     const placeholderImage = 'https://via.placeholder.com/400x300?text=No+Image';
     const SELECTORS = {
       galleryArea: 'galleryArea',
       folderMenu: 'folderMenu',
-      sizeFilter: 'sizeFilter',
-      colorFilter: 'colorFilter',
-      workFilter: 'workFilter',
       galleryCount: 'galleryCount'
     };
+
 
     const state = {
       folders: [],
       activeIndex: 0,
-      selectedSize: '',
-      selectedColor: '',
-      selectedWork: ''
+      selectedSizes: new Set(),
+      selectedColors: new Set(),
+      selectedWorks: new Set()
     };
-
-    // Safe wrapper for google.script.run tracking (fails silently on iOS)
-    function safeTrackEvent(eventName, params) {
-      try {
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run.trackEvent(eventName, params);
-        }
-      } catch (e) { /* silently ignore tracking errors */ }
-    }
 
     function normalizeStatusValue(value) {
       return String(value || '').replace(/\s+/g, '').toUpperCase();
     }
 
-    function setSelectOptions(selectEl, values) {
-      if (!selectEl) return;
-      const normalized = (values || []).map(value => String(value || '').trim()).filter(Boolean);
-      const unique = Array.from(new Set(normalized)).sort((a, b) => a.localeCompare(b));
-      selectEl.innerHTML = '<option value="">All</option>';
-      unique.forEach(value => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.textContent = value;
-        selectEl.appendChild(option);
-      });
-    }
 
-    function applyFilters(items) {
+    function applyFilters(items = []) {
       return (items || []).filter(item => {
-        if (state.selectedSize && item.size !== state.selectedSize) return false;
-        if (state.selectedWork && item.workStyle !== state.selectedWork) return false;
-        if (state.selectedColor) {
-          const target = state.selectedColor.toLowerCase();
+        if (state.selectedSizes.size > 0 && !state.selectedSizes.has(item.size)) return false;
+        if (state.selectedWorks.size > 0 && !state.selectedWorks.has(item.workStyle)) return false;
+        if (state.selectedColors.size > 0) {
           const colorValue = String(item.color || '').toLowerCase();
-          if (!colorValue.includes(target)) return false;
+          const matched = Array.from(state.selectedColors).some(c => colorValue.includes(c.toLowerCase()));
+          if (!matched) return false;
         }
         return true;
       });
@@ -725,53 +1152,106 @@
       return state.folders[index];
     }
 
+    // DM button template — built ONCE, cloned cheaply per card
+    const _dmBtnTemplate = (() => {
+      const a = document.createElement('a');
+      a.className = 'dm-btn';
+      a.href = 'https://ig.me/m/zari_mandir';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      svg.setAttribute('viewBox', '0 0 24 24');
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', 'M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z');
+      svg.appendChild(path);
+      a.appendChild(svg);
+      a.appendChild(document.createTextNode(' DM to Order'));
+      return a;
+    })();
+
     function getGalleryGroupKey(item) {
       const uid = String(item.uid || '').trim();
       const baseUid = uid.replace(/[-_ ]?\d{2,3}$/, '').trim();
-      if (baseUid) return 'UID:' + baseUid;
+      if (baseUid) return `UID:${baseUid}`;
       const fileId = String(item.imageFileId || '').trim();
-      if (fileId) return 'FILE:' + fileId;
+      if (fileId) return `FILE:${fileId}`;
       const imageUrl = String(item.imageUrl || '').trim();
-      if (imageUrl) return 'URL:' + imageUrl;
+      if (imageUrl) return `URL:${imageUrl}`;
       const itemType = String(item.itemType || '').trim();
       const color = String(item.color || '').trim();
       const work = String(item.workStyle || '').trim();
-      return 'META:' + itemType + '|' + color + '|' + work;
+      return `META:${itemType}|${color}|${work}`;
     }
 
-    function groupItemsForGallery(items) {
+    function groupItemsForGallery(items = []) {
       const map = new Map();
       (items || []).forEach(item => {
         const key = getGalleryGroupKey(item);
         if (!map.has(key)) {
-          map.set(key, { key: key, items: [], representative: item });
+          map.set(key, { key, items: [], representative: item });
         }
         const entry = map.get(key);
         entry.items.push(item);
+        // Prefer a non-sold item as the representative so the card title/info is correct
+        const isSold = normalizeStatusValue(item.status) === 'SOLD';
         if (!entry.representative.imageUrl && item.imageUrl) {
+          entry.representative = item;
+        } else if (!isSold && normalizeStatusValue(entry.representative.status) === 'SOLD') {
           entry.representative = item;
         }
       });
-      return Array.from(map.values());
+      // Hide groups where EVERY size/variant is sold out
+      return Array.from(map.values()).filter(group =>
+        group.items.some(item => normalizeStatusValue(item.status) !== 'SOLD')
+      );
     }
 
-    function getSortedSizes(items) {
-      const availableItems = items.filter(item => normalizeStatusValue(item.status) !== 'SOLD');
-      const sizes = Array.from(new Set(availableItems.map(item => String(item.size || '').trim()).filter(Boolean)));
-      const getNum = function(value) {
+    function getSortedSizes(items = []) {
+      // Build a map: size -> isSoldOut (true only if EVERY entry for that size is sold)
+      const sizeStatusMap = new Map();
+      (items || []).forEach(item => {
+        const size = String(item.size || '').trim();
+        if (!size) return;
+        const isSold = normalizeStatusValue(item.status) === 'SOLD';
+        if (!sizeStatusMap.has(size)) {
+          sizeStatusMap.set(size, isSold);
+        } else {
+          // Only mark sold-out if ALL entries for this size are sold
+          sizeStatusMap.set(size, sizeStatusMap.get(size) && isSold);
+        }
+      });
+      const getNum = (value) => {
         const match = String(value || '').match(/\d+/);
         return match ? Number(match[0]) : NaN;
       };
-      sizes.sort(function(a, b) {
+      const entries = Array.from(sizeStatusMap.entries());
+      entries.sort(([a], [b]) => {
         const na = getNum(a);
         const nb = getNum(b);
-        if (!isNaN(na) && !isNaN(nb) && na !== nb) return na - nb;
-        if (!isNaN(na) && isNaN(nb)) return -1;
-        if (isNaN(na) && !isNaN(nb)) return 1;
+        if (!Number.isNaN(na) && !Number.isNaN(nb) && na !== nb) return na - nb;
+        if (!Number.isNaN(na) && Number.isNaN(nb)) return -1;
+        if (Number.isNaN(na) && !Number.isNaN(nb)) return 1;
         return a.localeCompare(b);
       });
-      return sizes;
+      // Return array of { size, soldOut } objects
+      return entries.map(([size, soldOut]) => ({ size, soldOut }));
     }
+
+    // Lazy-load images: swap data-src → src only when the image enters the viewport
+    const _lazyObserver = ('IntersectionObserver' in window)
+      ? new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+              img.src = img.dataset.src;
+              delete img.dataset.src;
+            }
+            _lazyObserver.unobserve(img);
+          }
+        });
+      }, { rootMargin: '200px' })
+      : null;
 
     function renderGallery(folder, groups) {
       const gallery = document.getElementById(SELECTORS.galleryArea);
@@ -781,7 +1261,7 @@
         gallery.innerHTML = '<div class="empty-state">No images match the current filters.</div>';
         return;
       }
-      groups.forEach(function(group) {
+      groups.forEach(group => {
         const item = group.representative;
         const card = document.createElement('article');
         card.className = 'card';
@@ -792,20 +1272,27 @@
         const imgContainer = document.createElement('div');
         imgContainer.className = 'card-images';
 
+        // Collect images
         const imagesToRender = [];
         const seenUrls = new Set();
 
-        group.items.forEach(function(gItem) {
+        // 1. Prioritize website images
+        group.items.forEach(gItem => {
           if (gItem.additionalImages && gItem.additionalImages.length > 0) {
-            gItem.additionalImages.forEach(function(extra) {
+            gItem.additionalImages.forEach(extra => {
               if (!seenUrls.has(extra.url)) {
                 seenUrls.add(extra.url);
-                imagesToRender.push({ thumbnailUrl: extra.url, fullUrl: extra.url, alt: 'View' });
+                imagesToRender.push({
+                  thumbnailUrl: extra.url,
+                  fullUrl: extra.url,
+                  alt: 'View'
+                });
               }
             });
           }
         });
 
+        // 2. Add capture image
         const mainUrl = item.thumbnailUrl || item.imageUrl;
         if (mainUrl) {
           if (!seenUrls.has(mainUrl)) {
@@ -817,29 +1304,59 @@
             });
           }
         } else if (imagesToRender.length === 0) {
-          imagesToRender.push({ thumbnailUrl: placeholderImage, fullUrl: placeholderImage, alt: 'No Image' });
+          imagesToRender.push({
+            thumbnailUrl: placeholderImage,
+            fullUrl: placeholderImage,
+            alt: 'No Image'
+          });
         }
 
-        imagesToRender.forEach(function(imgData, index) {
+        // Build the full-URL array once per card (not once per image)
+        const allFullUrls = imagesToRender.map(i => i.fullUrl || i.url);
+
+        // Render images with lazy loading
+        imagesToRender.forEach((imgData, index) => {
           const img = document.createElement('img');
-          img.src = imgData.thumbnailUrl || imgData.url;
+          const src = imgData.thumbnailUrl || imgData.url;
+          if (_lazyObserver && index > 0) {
+            // Lazy-load all but the first image of each card
+            img.dataset.src = src;
+            img.src = '';
+            _lazyObserver.observe(img);
+          } else {
+            img.src = src;
+          }
           img.setAttribute('data-full-url', imgData.fullUrl || imgData.url);
           img.setAttribute('data-image-index', index);
-          img.setAttribute('data-image-group', JSON.stringify(imagesToRender.map(function(i) { return i.fullUrl || i.url; })));
           img.alt = imgData.alt;
-          img.onclick = function() {
-            const imageGroup = JSON.parse(img.getAttribute('data-image-group'));
+          img.onclick = () => {
             const startIndex = parseInt(img.getAttribute('data-image-index'));
-            openLightbox(imageGroup, startIndex);
+            openLightbox(allFullUrls, startIndex);
           };
           imgContainer.appendChild(img);
         });
 
         imgWrapper.appendChild(imgContainer);
 
+        // Instagram-style stacked-squares badge for multi-image cards
+        if (imagesToRender.length > 1) {
+          const badge = document.createElement('div');
+          badge.className = 'multi-img-badge';
+          // SVG mimics Instagram's "multiple images" icon: two overlapping rounded squares
+          badge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="5" y="5" width="13" height="13" rx="2.5" fill="white" opacity="0.85"/>
+            <rect x="2" y="2" width="13" height="13" rx="2.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.85"/>
+            <rect x="5" y="5" width="13" height="13" rx="2.5" stroke="white" stroke-width="1.8" fill="none" opacity="0.85"/>
+          </svg>`;
+          imgWrapper.appendChild(badge);
+        }
+
+        // Render dots (only shown for multi-image cards)
         if (imagesToRender.length > 0) {
           const dotsContainer = document.createElement('div');
           dotsContainer.className = 'dots-container';
+          // Hide dots for single-image cards — no need to show one dot
+          if (imagesToRender.length === 1) dotsContainer.style.display = 'none';
           for (let i = 0; i < imagesToRender.length; i++) {
             const dot = document.createElement('div');
             dot.className = 'dot' + (i === 0 ? ' active' : '');
@@ -847,7 +1364,8 @@
           }
           imgWrapper.appendChild(dotsContainer);
 
-          imgContainer.addEventListener('scroll', function() {
+          // Scroll listener for dots
+          imgContainer.addEventListener('scroll', () => {
             const width = imgContainer.clientWidth;
             if (width > 0) {
               const index = Math.round(imgContainer.scrollLeft / width);
@@ -859,18 +1377,19 @@
             }
           }, { passive: true });
 
+          // Navigation arrows for mouse users
           if (imagesToRender.length > 1) {
             const prevBtn = document.createElement('button');
             prevBtn.className = 'nav-btn prev';
             prevBtn.innerHTML = '&lsaquo;';
-            prevBtn.onclick = function(e) {
+            prevBtn.onclick = (e) => {
               e.stopPropagation();
               imgContainer.scrollBy({ left: -imgContainer.clientWidth, behavior: 'smooth' });
             };
             const nextBtn = document.createElement('button');
             nextBtn.className = 'nav-btn next';
             nextBtn.innerHTML = '&rsaquo;';
-            nextBtn.onclick = function(e) {
+            nextBtn.onclick = (e) => {
               e.stopPropagation();
               imgContainer.scrollBy({ left: imgContainer.clientWidth, behavior: 'smooth' });
             };
@@ -879,31 +1398,42 @@
           }
         }
 
+        // DM to Order hover button — clone from template (defined once above, not re-parsed per card)
+        imgWrapper.appendChild(_dmBtnTemplate.cloneNode(true));
+
         card.appendChild(imgWrapper);
 
         const content = document.createElement('div');
         content.className = 'card-content';
 
+        // Description: ITEM TYPE + FABRIC + WORK STYLE + "IN" + COLOR
         const descParts = [item.itemType, item.fabric, item.workStyle].filter(Boolean);
         let descText = descParts.join(' ');
-        if (item.color) descText += (descText ? ' IN ' : '') + item.color;
+        if (item.color) {
+          descText += (descText ? ' IN ' : '') + item.color;
+        }
         const desc = document.createElement('h3');
         desc.className = 'item-description';
         desc.textContent = descText || 'Item';
         content.appendChild(desc);
 
-        if (item.status) {
-          const status = document.createElement('span');
-          status.className = 'status-note';
-          status.textContent = item.status;
-          content.appendChild(status);
-        }
         const sizes = getSortedSizes(group.items);
         if (sizes.length) {
-          const info = document.createElement('p');
-          info.className = 'info-line';
-          info.textContent = 'Sizes: ' + sizes.join(', ');
-          content.appendChild(info);
+          const pillsRow = document.createElement('div');
+          pillsRow.className = 'size-pills';
+          sizes.forEach(({ size, soldOut }) => {
+            const pill = document.createElement('span');
+            pill.className = 'size-pill' + (soldOut ? ' sold-out' : '');
+            pill.textContent = size;
+            if (soldOut) {
+              const x = document.createElement('span');
+              x.className = 'pill-x';
+              x.textContent = '✕';
+              pill.appendChild(x);
+            }
+            pillsRow.appendChild(pill);
+          });
+          content.appendChild(pillsRow);
         }
 
         const barcode = document.createElement('div');
@@ -916,53 +1446,262 @@
       });
     }
 
+    function setSelectOptions(selectEl, values = []) {
+      if (!selectEl) return;
+      const current = selectEl.value;
+      selectEl.innerHTML = '<option value="">All</option>';
+      values.forEach(value => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = value;
+        selectEl.appendChild(option);
+      });
+      // Restore selection if it still exists in new options
+      if (current && values.includes(current)) selectEl.value = current;
+    }
+
+    // Build tappable size chips with multi-select toggle
+    function buildSizeChips(values) {
+      const container = document.getElementById('sizeChips');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // "All" chip
+      const allChip = document.createElement('button');
+      allChip.type = 'button';
+      allChip.className = 'size-filter-chip' + (state.selectedSizes.size === 0 ? ' active' : '');
+      allChip.textContent = 'All';
+      allChip.dataset.value = '';
+      allChip.addEventListener('click', () => {
+        state.selectedSizes.clear();
+        container.querySelectorAll('.size-filter-chip').forEach(c => c.classList.remove('active'));
+        allChip.classList.add('active');
+        renderCurrentFolder();
+      });
+      container.appendChild(allChip);
+
+      values.forEach(value => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'size-filter-chip' + (state.selectedSizes.has(value) ? ' active' : '');
+        chip.textContent = value;
+        chip.dataset.value = value;
+        chip.addEventListener('click', () => {
+          if (state.selectedSizes.has(value)) {
+            state.selectedSizes.delete(value);
+            chip.classList.remove('active');
+          } else {
+            state.selectedSizes.add(value);
+            chip.classList.add('active');
+          }
+          // "All" chip is active only when nothing is selected
+          allChip.classList.toggle('active', state.selectedSizes.size === 0);
+          renderCurrentFolder();
+        });
+        container.appendChild(chip);
+      });
+    }
+
+    // Build a custom multi-select dropdown for color / work-style
+    function buildMultiSelectDropdown(wrapperId, triggerId, panelId, values, selectedSet, onChangeCallback) {
+      const wrap = document.getElementById(wrapperId);
+      const trigger = document.getElementById(triggerId);
+      const panel = document.getElementById(panelId);
+      if (!wrap || !trigger || !panel) return;
+      panel.innerHTML = '';
+
+      function updateTriggerLabel() {
+        if (selectedSet.size === 0) {
+          trigger.textContent = 'All';
+          trigger.classList.remove('has-selection');
+        } else {
+          const items = Array.from(selectedSet);
+          trigger.textContent = items.length === 1 ? items[0] : `${items.length} selected`;
+          trigger.classList.add('has-selection');
+        }
+      }
+
+      function syncAllCheckbox() {
+        if (allCb) allCb.checked = selectedSet.size === 0;
+      }
+
+      // "All" option — clears every selection
+      let allCb = null;
+      const allOption = document.createElement('label');
+      allOption.className = 'multi-select-option';
+      allCb = document.createElement('input');
+      allCb.type = 'checkbox';
+      allCb.checked = selectedSet.size === 0;
+      allCb.addEventListener('change', () => {
+        if (allCb.checked) {
+          selectedSet.clear();
+          // Uncheck all individual checkboxes
+          panel.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            if (cb !== allCb) cb.checked = false;
+          });
+          updateTriggerLabel();
+          onChangeCallback();
+        } else {
+          // Don't allow unchecking "All" directly — re-check it
+          allCb.checked = true;
+        }
+      });
+      allOption.appendChild(allCb);
+      allOption.appendChild(document.createTextNode('All'));
+      panel.appendChild(allOption);
+
+      values.forEach(value => {
+        const option = document.createElement('label');
+        option.className = 'multi-select-option';
+        const cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = selectedSet.has(value);
+        cb.addEventListener('change', () => {
+          if (cb.checked) selectedSet.add(value);
+          else selectedSet.delete(value);
+          syncAllCheckbox();
+          updateTriggerLabel();
+          onChangeCallback();
+        });
+        option.appendChild(cb);
+        option.appendChild(document.createTextNode(value));
+        panel.appendChild(option);
+      });
+
+      updateTriggerLabel();
+
+      // Register click handlers once per wrapper
+      if (!wrap._msInitDone) {
+        wrap._msInitDone = true;
+
+        // Stop ALL clicks inside the wrap from reaching the document close handler
+        wrap.addEventListener('click', (e) => e.stopPropagation());
+        // Stop clicks inside the panel too (panel is positioned fixed, may be outside wrap in layout)
+        panel.addEventListener('click', (e) => e.stopPropagation());
+
+        // Toggle open/close on trigger click
+        trigger.addEventListener('click', () => {
+          const isOpen = wrap.classList.contains('open');
+          // Close all other open dropdowns first
+          document.querySelectorAll('.multi-select-wrap.open').forEach(el => el.classList.remove('open'));
+          // Toggle this one
+          if (!isOpen) {
+            // Position the panel using fixed coords to escape any overflow:auto clipping
+            const rect = trigger.getBoundingClientRect();
+            panel.style.top = (rect.bottom + 4) + 'px';
+            panel.style.left = rect.left + 'px';
+            panel.style.minWidth = Math.max(160, rect.width) + 'px';
+            wrap.classList.add('open');
+          }
+        });
+      }
+    }
+
     function updateFilterOptions(folder) {
       if (!folder) return;
-      const sizes = Array.from(new Set(folder.items.map(function(item) { return item.size; }).filter(Boolean)));
-      const colors = Array.from(new Set(folder.items.map(function(item) { return item.color; }).filter(Boolean)));
-      const works = Array.from(new Set(folder.items.map(function(item) { return item.workStyle; }).filter(Boolean)));
-      setSelectOptions(document.getElementById(SELECTORS.sizeFilter), sizes);
-      setSelectOptions(document.getElementById(SELECTORS.colorFilter), colors);
-      setSelectOptions(document.getElementById(SELECTORS.workFilter), works);
-      const colorSelect = document.getElementById(SELECTORS.colorFilter);
-      const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
-      const workSelect = document.getElementById(SELECTORS.workFilter);
-      if (sizeSelect) sizeSelect.value = state.selectedSize || '';
-      if (colorSelect) colorSelect.value = state.selectedColor || '';
-      if (workSelect) workSelect.value = state.selectedWork || '';
+      const sizes = Array.from(new Set(folder.items.map(item => item.size).filter(Boolean)))
+        .sort((a, b) => { const na = Number(a), nb = Number(b); return !isNaN(na) && !isNaN(nb) ? na - nb : a.localeCompare(b); });
+      const colors = Array.from(new Set(folder.items.map(item => item.color).filter(Boolean))).sort();
+      const works = Array.from(new Set(folder.items.map(item => item.workStyle).filter(Boolean))).sort();
+      // Size → multi-select chips; Color + Work Style → custom multi-select dropdowns
+      buildSizeChips(sizes);
+      buildMultiSelectDropdown('colorFilterWrap', 'colorFilterTrigger', 'colorFilterPanel', colors, state.selectedColors, renderCurrentFolder);
+      buildMultiSelectDropdown('workFilterWrap', 'workFilterTrigger', 'workFilterPanel', works, state.selectedWorks, renderCurrentFolder);
     }
 
     function updateGalleryCount(folder, filteredCount, totalCount) {
       const galleryCount = document.getElementById(SELECTORS.galleryCount);
       if (!galleryCount) return;
-      if (!folder) { galleryCount.textContent = '0 ITEMS'; return; }
-      const total = typeof totalCount === 'number' ? totalCount : (Array.isArray(folder.items) ? folder.items.length : 0);
+      if (!folder) {
+        galleryCount.textContent = '0 ITEMS';
+        return;
+      }
+      const total = typeof totalCount === 'number'
+        ? totalCount
+        : (Array.isArray(folder.items) ? folder.items.length : 0);
       const folderLabel = folder.folderName || 'Untitled';
       if (typeof filteredCount === 'number' && filteredCount !== total) {
-        galleryCount.textContent = folderLabel + ' - Showing ' + filteredCount + ' of ' + total;
+        galleryCount.textContent = `${folderLabel} - Showing ${filteredCount} of ${total}`;
       } else {
-        galleryCount.textContent = folderLabel + ' - ' + total + ' ITEMS';
+        galleryCount.textContent = `${folderLabel} - ${total} ITEMS`;
       }
     }
 
     function updateMenuActiveState() {
-      const buttons = document.getElementById(SELECTORS.folderMenu).querySelectorAll('button') || [];
-      buttons.forEach(function(button, index) {
+      const buttons = document.getElementById(SELECTORS.folderMenu)?.querySelectorAll('button') || [];
+      buttons.forEach((button, index) => {
         button.classList.toggle('active', index === state.activeIndex);
       });
     }
 
+    function countGroupImages(group) {
+      // Count unique additional images across all items in the group, plus the main image
+      const seenUrls = new Set();
+      group.items.forEach(gItem => {
+        if (gItem.additionalImages && gItem.additionalImages.length > 0) {
+          gItem.additionalImages.forEach(extra => seenUrls.add(extra.url));
+        }
+      });
+      const mainUrl = group.representative.thumbnailUrl || group.representative.imageUrl;
+      if (mainUrl) seenUrls.add(mainUrl);
+      return seenUrls.size;
+    }
+
+    function sortGroupsByImageCount(groups) {
+      return groups.slice().sort((a, b) => countGroupImages(b) - countGroupImages(a));
+    }
+
+    function resetAllFilters() {
+      state.selectedSizes.clear();
+      state.selectedColors.clear();
+      state.selectedWorks.clear();
+      // Rebuild filter UI so chips and dropdowns reflect cleared state
+      const folder = getActiveFolder();
+      updateFilterOptions(folder);
+      renderCurrentFolder();
+    }
+
+    // Test if a single item satisfies the current active filters
+    function itemMatchesFilter(item) {
+      if (state.selectedSizes.size > 0 && !state.selectedSizes.has(item.size)) return false;
+      if (state.selectedWorks.size > 0 && !state.selectedWorks.has(item.workStyle)) return false;
+      if (state.selectedColors.size > 0) {
+        const colorValue = String(item.color || '').toLowerCase();
+        const matched = Array.from(state.selectedColors).some(c => colorValue.includes(c.toLowerCase()));
+        if (!matched) return false;
+      }
+      return true;
+    }
+
     function renderCurrentFolder() {
       const folder = getActiveFolder();
-      const filteredItems = applyFilters(folder ? folder.items : []);
-      const groupedFiltered = groupItemsForGallery(filteredItems);
-      const groupedTotal = groupItemsForGallery(folder ? folder.items : []).length;
+      const hasActiveFilter = state.selectedSizes.size > 0 || state.selectedColors.size > 0 || state.selectedWorks.size > 0;
+
+      // Group ALL items first — this ensures every group always contains all size
+      // variants and therefore all their images (website photos, capture shots, etc.)
+      const allGroups = groupItemsForGallery(folder ? folder.items : []);
+
+      // Filter which GROUPS to show: a group is visible if at least one of its
+      // size variants matches the current filters. The group itself is NOT trimmed,
+      // so all images and size pills remain intact.
+      const visibleGroups = hasActiveFilter
+        ? allGroups.filter(group => group.items.some(item => itemMatchesFilter(item)))
+        : allGroups;
+
+      const groupedFiltered = sortGroupsByImageCount(visibleGroups);
       renderGallery(folder, groupedFiltered);
-      updateGalleryCount(folder, groupedFiltered.length, groupedTotal);
+      updateGalleryCount(folder, groupedFiltered.length, hasActiveFilter ? allGroups.length : groupedFiltered.length);
+      // Show/hide the Reset button
+      const resetBtn = document.getElementById('filterReset');
+      if (resetBtn) resetBtn.style.display = hasActiveFilter ? 'inline-flex' : 'none';
     }
 
     function handleFolderSelection(index) {
       state.activeIndex = index;
+      // Reset all filters when switching categories
+      state.selectedSizes.clear();
+      state.selectedColors.clear();
+      state.selectedWorks.clear();
       const folder = getActiveFolder();
       updateFilterOptions(folder);
       updateMenuActiveState();
@@ -979,21 +1718,22 @@
         document.getElementById(SELECTORS.galleryCount).textContent = 'NO ITEMS';
         return;
       }
-      state.folders.forEach(function(folder, index) {
+      state.folders.forEach((folder, index) => {
         const button = document.createElement('button');
-        const countLabel = folder.count ? ' (' + folder.count + ')' : '';
+        const countLabel = folder.count ? ` (${folder.count})` : '';
         button.type = 'button';
-        button.textContent = (folder.folderName || 'Untitled') + countLabel;
-        button.addEventListener('click', function() {
+        button.textContent = `${folder.folderName || 'Untitled'}${countLabel}`;
+        button.addEventListener('click', () => {
           handleFolderSelection(index);
+          // Update URL with category parameter for shareable links
           const categoryName = folder.folderName || '';
           if (categoryName) {
             const url = new URL(window.location);
             url.searchParams.set('category', categoryName);
             window.history.pushState({}, '', url);
           }
-          // FIX: safeTrackEvent won't crash on iOS if google.script.run is unavailable
-          safeTrackEvent('select_content', {
+          // Google Analytics tracking - server-side
+          google.script.run.trackEvent('select_content', {
             content_type: 'category_filter',
             item_id: categoryName.toLowerCase().replace(/\s+/g, '_')
           });
@@ -1007,150 +1747,239 @@
     }
 
     function bindFilterListeners() {
-      const sizeSelect = document.getElementById(SELECTORS.sizeFilter);
-      const colorSelect = document.getElementById(SELECTORS.colorFilter);
-      const workSelect = document.getElementById(SELECTORS.workFilter);
-      if (sizeSelect) sizeSelect.addEventListener('change', function(e) { state.selectedSize = e.target.value; renderCurrentFolder(); });
-      if (colorSelect) colorSelect.addEventListener('change', function(e) { state.selectedColor = e.target.value; renderCurrentFolder(); });
-      if (workSelect) workSelect.addEventListener('change', function(e) { state.selectedWork = e.target.value; renderCurrentFolder(); });
+      // Size filter uses chips with inline click handlers.
+      // Color and Work Style use custom multi-select dropdowns built by buildMultiSelectDropdown().
+      // Close any open dropdown when clicking outside
+      document.addEventListener('click', () => {
+        document.querySelectorAll('.multi-select-wrap.open').forEach(el => el.classList.remove('open'));
+      });
+    }
+
+    function showSkeletons(count = 8) {
+      const gallery = document.getElementById(SELECTORS.galleryArea);
+      if (!gallery) return;
+      gallery.innerHTML = '';
+      for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'skeleton-card';
+        card.innerHTML = `
+          <div class="skeleton-img"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line short"></div>
+          <div class="skeleton-line xshort"></div>`;
+        gallery.appendChild(card);
+      }
+    }
+
+    function hideSkeletons() {
+      const gallery = document.getElementById(SELECTORS.galleryArea);
+      if (!gallery) return;
+      gallery.querySelectorAll('.skeleton-card').forEach(el => el.remove());
     }
 
     function handleData(response) {
+      hideSkeletons();
       const rawFolders = Array.isArray(response.folders) ? response.folders : [];
+
+      // Merge folders with the same name to prevent duplicates
       const mergedMap = new Map();
 
-      rawFolders.forEach(function(folder) {
-        const validItems = (folder.items || []).filter(function(item) { return normalizeStatusValue(item.status) !== 'SOLD'; });
-        if (validItems.length === 0) return;
+      rawFolders.forEach(folder => {
+        const allItems = folder.items || [];
+
+        // Only keep items that have at least some content; keep sold items so we can show size pills
+        const validItems = allItems.filter(item => item.uid || item.imageUrl || item.imageFileId);
+
+        // Skip this folder-group entirely only if every single item is sold out
+        const allSold = validItems.length > 0 && validItems.every(item => normalizeStatusValue(item.status) === 'SOLD');
+        if (validItems.length === 0 || allSold) return;
+
         const name = folder.folderName || 'Untitled';
         const key = name.trim().toUpperCase();
+
+        // Filter out meta-folders that shouldn't be categories
         if (key === 'GALLERY' || key === 'CONTACT' || key === 'HOME') return;
+
+        // Count only non-sold items for the category tab label
+        const availableCount = validItems.filter(item => normalizeStatusValue(item.status) !== 'SOLD').length;
+
         if (!mergedMap.has(key)) {
-          mergedMap.set(key, Object.assign({}, folder, { items: validItems.slice(), count: validItems.length }));
+          mergedMap.set(key, { ...folder, items: [...validItems], count: availableCount });
         } else {
           const existing = mergedMap.get(key);
-          existing.items.push.apply(existing.items, validItems);
-          existing.count += validItems.length;
+          existing.items.push(...validItems);
+          existing.count += availableCount;
         }
       });
 
       let folders = Array.from(mergedMap.values());
+
+      // Check URL parameters for category
       const urlParams = new URLSearchParams(window.location.search);
       const categoryParam = urlParams.get('category');
+
       let defaultIndex = 0;
 
       if (categoryParam) {
-        const paramIndex = folders.findIndex(function(f) {
-          return (f.folderName || '').trim().toUpperCase() === categoryParam.trim().toUpperCase();
-        });
-        if (paramIndex >= 0) defaultIndex = paramIndex;
+        // If category is specified in URL, try to find and use it
+        const paramIndex = folders.findIndex(f =>
+          (f.folderName || '').trim().toUpperCase() === categoryParam.trim().toUpperCase()
+        );
+        if (paramIndex >= 0) {
+          defaultIndex = paramIndex;
+        }
       } else {
-        const threePieceIndex = folders.findIndex(function(f) {
-          return (f.folderName || '').trim().toUpperCase() === '3 PIECE';
-        });
+        // Default behavior: Find and move "3 PIECE" to the front
+        const defaultCategory = "3 PIECE";
+        const threePieceIndex = folders.findIndex(f =>
+          (f.folderName || '').trim().toUpperCase() === defaultCategory
+        );
         if (threePieceIndex > 0) {
-          const defaultFolder = folders.splice(threePieceIndex, 1)[0];
+          const [defaultFolder] = folders.splice(threePieceIndex, 1);
           folders.unshift(defaultFolder);
+          defaultIndex = 0;
+        } else if (threePieceIndex === 0) {
           defaultIndex = 0;
         }
       }
 
       state.folders = folders;
       state.activeIndex = defaultIndex;
-      state.selectedSize = '';
-      state.selectedColor = '';
-      state.selectedWork = '';
+      state.selectedSizes.clear();
+      state.selectedColors.clear();
+      state.selectedWorks.clear();
       renderMenu();
     }
 
     function handleError(err) {
+      hideSkeletons();
       const menu = document.getElementById(SELECTORS.folderMenu);
       const gallery = document.getElementById(SELECTORS.galleryArea);
       const count = document.getElementById(SELECTORS.galleryCount);
       if (menu) menu.innerHTML = '';
-      if (gallery) gallery.innerHTML = '<div class="empty-state">Failed to load gallery: ' + (err && err.message ? err.message : 'Unknown error') + '</div>';
+      if (gallery) gallery.innerHTML = `<div class="empty-state">Failed to load gallery: ${err && err.message ? err.message : 'Unknown error'}</div>`;
       if (count) count.textContent = 'FAILED';
     }
 
     function init() {
       bindFilterListeners();
+      showSkeletons();
 
-      // Attach DM link and Instagram tracking safely (no inline onclick)
-      var dmLink = document.getElementById('dm-link');
-      if (dmLink) {
-        dmLink.addEventListener('click', function() {
-          safeTrackEvent('generate_lead', { lead_source: 'instagram_text' });
-          window.open('https://ig.me/m/zari_mandir', '_blank');
-        });
-      }
-      var igLink = document.getElementById('instagram-link');
-      if (igLink) {
-        igLink.addEventListener('click', function() {
-          safeTrackEvent('generate_lead', { lead_source: 'instagram_icon' });
-        });
-      }
-
+      // Check if running in local development mode
       const isLocalDev = window.location.protocol === 'file:' ||
         window.location.hostname === 'localhost' ||
         window.location.hostname === '127.0.0.1';
 
       if (isLocalDev && window.MOCK_GALLERY_DATA) {
+        console.log('🔧 LOCAL DEV MODE: Using mock data');
         handleData(window.MOCK_GALLERY_DATA);
         return;
       }
 
-      // FIX: Use REST fetch() instead of google.script.run — works on all browsers including iOS/Instagram
-      fetch(APPS_SCRIPT_URL + '?page=gallery-data&t=' + Date.now())
+      // ── REST API fetch (works on all browsers including iOS/Instagram) ──
+      // Determine the correct base URL for the API.
+      // If we're running inside Apps Script (googleusercontent.com or script.google.com),
+      // derive the URL from window.location. Otherwise use the hardcoded Apps Script URL.
+      const currentHref = (function() {
+        try { return window.location.href || ''; } catch(e) { return ''; }
+      })();
+      const isOnAppsScript = currentHref.indexOf('script.google.com') !== -1 ||
+                             currentHref.indexOf('googleusercontent.com') !== -1;
+      const apiBase = isOnAppsScript
+        ? currentHref.split('?')[0].replace(/\/$/, '')
+        : APPS_SCRIPT_URL;
+
+      const apiUrl = apiBase + '?page=gallery-data&t=' + Date.now();
+      console.log('🚀 Fetching gallery data via REST API:', apiUrl);
+      fetch(apiUrl)
         .then(function(res) {
           if (!res.ok) throw new Error('HTTP ' + res.status);
           return res.json();
         })
-        .then(handleData)
-        .catch(handleError);
+        .then(function(data) {
+          if (data && data.error) throw new Error(data.error);
+          handleData(data);
+        })
+        .catch(function(err) {
+          console.warn('REST fetch failed:', err);
+          handleError(err);
+        });
     }
 
-    // Lightbox
-    var currentImageGroup = [];
-    var currentImageIndex = 0;
 
-    window.openLightbox = function(imageGroup, startIndex) {
-      startIndex = startIndex || 0;
+
+    // Lightbox functionality - Make globally accessible for inline onclick handlers
+    let currentImageGroup = [];
+    let currentImageIndex = 0;
+
+    window.openLightbox = function (imageGroup, startIndex = 0) {
       const lightbox = document.getElementById('lightbox');
       const lightboxImg = document.getElementById('lightbox-img');
       if (!lightbox || !lightboxImg) return;
+
+      // Store image group and index
       currentImageGroup = Array.isArray(imageGroup) ? imageGroup : [imageGroup];
       currentImageIndex = startIndex;
+
+      // Display the image
       lightboxImg.src = currentImageGroup[currentImageIndex];
       lightbox.style.display = 'flex';
+
+      // Update navigation buttons and counter
       updateLightboxNavigation();
+
+      // Prevent body scrolling when lightbox is open
       document.body.style.overflow = 'hidden';
-      setTimeout(function() { lightbox.classList.add('visible'); }, 10);
+
+      // Trigger fade-in animation
+      setTimeout(() => lightbox.classList.add('visible'), 10);
     };
 
-    window.closeLightbox = function() {
+    window.closeLightbox = function () {
       const lightbox = document.getElementById('lightbox');
       if (!lightbox) return;
+
+      // Fade out
       lightbox.classList.remove('visible');
       lightbox.classList.remove('active-zoom');
+
+      // Re-enable body scrolling
       document.body.style.overflow = '';
-      setTimeout(function() { lightbox.style.display = 'none'; }, 300);
+
+      // Hide after animation
+      setTimeout(() => {
+        lightbox.style.display = 'none';
+      }, 300);
+
+      // Reset image group
       currentImageGroup = [];
       currentImageIndex = 0;
     };
 
-    window.toggleZoom = function(event) {
+    window.toggleZoom = function (event) {
       event.stopPropagation();
       const lightbox = document.getElementById('lightbox');
-      if (lightbox) lightbox.classList.toggle('active-zoom');
+      if (!lightbox) return;
+
+      lightbox.classList.toggle('active-zoom');
     };
 
-    window.navigateLightbox = function(direction) {
+    window.navigateLightbox = function (direction) {
       if (currentImageGroup.length <= 1) return;
+
       currentImageIndex += direction;
+
+      // Wrap around
       if (currentImageIndex < 0) currentImageIndex = currentImageGroup.length - 1;
       if (currentImageIndex >= currentImageGroup.length) currentImageIndex = 0;
+
+      // Update image
       const lightboxImg = document.getElementById('lightbox-img');
-      if (lightboxImg) lightboxImg.src = currentImageGroup[currentImageIndex];
+      if (lightboxImg) {
+        lightboxImg.src = currentImageGroup[currentImageIndex];
+      }
+
+      // Update navigation
       updateLightboxNavigation();
     };
 
@@ -1158,8 +1987,12 @@
       const prevBtn = document.getElementById('lightbox-prev');
       const nextBtn = document.getElementById('lightbox-next');
       const counter = document.getElementById('lightbox-counter');
+
       if (prevBtn && nextBtn && counter) {
-        counter.textContent = (currentImageIndex + 1) + ' / ' + currentImageGroup.length;
+        // Update counter
+        counter.textContent = `${currentImageIndex + 1} / ${currentImageGroup.length}`;
+
+        // Hide navigation if only one image
         const hasMultiple = currentImageGroup.length > 1;
         prevBtn.style.display = hasMultiple ? 'flex' : 'none';
         nextBtn.style.display = hasMultiple ? 'flex' : 'none';
@@ -1167,16 +2000,39 @@
       }
     }
 
-    document.addEventListener('keydown', function(e) {
+    // Keyboard navigation
+    document.addEventListener('keydown', function (e) {
       const lightbox = document.getElementById('lightbox');
       if (!lightbox || lightbox.style.display === 'none') return;
-      if (e.key === 'ArrowLeft') navigateLightbox(-1);
-      else if (e.key === 'ArrowRight') navigateLightbox(1);
-      else if (e.key === 'Escape') closeLightbox();
+
+      if (e.key === 'ArrowLeft') {
+        navigateLightbox(-1);
+      } else if (e.key === 'ArrowRight') {
+        navigateLightbox(1);
+      } else if (e.key === 'Escape') {
+        closeLightbox();
+      }
     });
 
     window.addEventListener('load', init);
   </script>
+
+  <script>
+    function sendHeight() {
+      const height = document.body.scrollHeight;
+      // Sends height to the parent window (Hostinger)
+      window.parent.postMessage({ 'height': height }, "*");
+    }
+
+    // Send height when the page loads and whenever the window is resized
+    window.addEventListener('load', sendHeight);
+    window.addEventListener('resize', sendHeight);
+
+    // Optional: Monitor content changes (e.g., loading images in your gallery)
+    const observer = new ResizeObserver(sendHeight);
+    observer.observe(document.body);
+  </script>
+
 </body>
 
 </html>
